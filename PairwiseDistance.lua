@@ -51,7 +51,40 @@ function PairwiseDistance:updateGradInput(input, gradOutput)
    self.gradInput[1]:add(-1, input[2]) 
    
    if self.norm==1 then
-     self.gradInput[1]:apply(mathsign)
+     if self.gradInput[1]:type() ~= 'torch.CudaTensor' then
+       self.gradInput[1]:apply(mathsign)
+     else
+       -- [[
+       self.buffer = self.buffer or self.gradInput[1].new()
+       self.buffer:gt(self.gradInput[1],0)
+       
+       --self.buffer2 = self.buffer2 or torch.ByteTensor()
+       --self.buffer2:resize(self.gradInput[1]:size())
+       --self.buffer2:copy(self.buffer)
+       
+       self.gradInput[1][self.buffer] = 1
+       self.buffer:lt(self.gradInput[1],0)
+
+       --self.buffer2:copy(self.buffer)
+       self.gradInput[1][self.buffer] = -1
+       
+       self.buffer:eq(self.gradInput[1],0)
+      
+       self.buffer3 = self.buffer3 or self.gradInput[1].new()
+
+       self.buffer3:resize(self.gradInput[1]:size()):bernoulli(0.5)
+       
+       self.buffer:add(self.buffer3)
+       self.buffer3:eq(self.buffer,2)
+
+       --self.buffer2:copy(self.buffer3)
+
+       self.gradInput[1][self.buffer3] = 1
+       self.buffer:eq(self.gradInput[1],0)
+       --self.buffer2:copy(self.buffer)
+       self.gradInput[1][self.buffer] = -1
+     end
+     --]]
    else
      -- Note: derivative of p-norm:
      -- d/dx_k(||x||_p) = (x_k * abs(x_k)^(p-2)) / (||x||_p)^(p-1)
