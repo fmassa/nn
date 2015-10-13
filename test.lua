@@ -456,7 +456,7 @@ function nntest.Normalize()
       local ini = math.random(3,5)
       local inj = math.random(3,5)
       local ink = math.random(3,5)
-      local input = torch.Tensor(inj, ini):zero()
+      local input = torch.Tensor(inj, ini):normal()
 
       local module = nn.Normalize(p)
 

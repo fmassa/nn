@@ -12,7 +12,8 @@ local function updateOutputInf(self,input)
   self._indices = self._indices or
       (torch.type(self.output) == 'torch.CudaTensor' and torch.CudaTensor() or torch.LongTensor())
 
-  torch.max(self.norm, self._indices, input, 2)
+  self.buffer:abs(input)
+  torch.max(self.norm, self._indices, self.buffer, 2)
 end
 
 local function updateOutputLp(self,input)
@@ -66,6 +67,8 @@ function Normalize:updateGradInput(input, gradOutput)
   local n = input:size(1) -- batch size
   local d = input:size(2) -- dimensionality of vectors
 
+  self.cross = self.cross or input.new()
+
   -- compute diagonal term with gradOutput
   self.gradInput:resize(n,d,1)
   gradOutput = gradOutput:view(n,d,1)
@@ -73,15 +76,16 @@ function Normalize:updateGradInput(input, gradOutput)
   if self.p == math.huge then
     self.gradInput:cmul(self.norm:view(n,1,1):expand(n,d,1),gradOutput)
     self.buffer:resizeAs(input):zero()
-    self.buffer:scatter(2,self._indices,1)
+    self.cross:resize(n,1)
+    self.cross:gather(input,2,self._indices)
+    self.cross:cdiv(self.norm)
+    self.buffer:scatter(2,self._indices,self.cross)
   else
     self.gradInput:cmul(self.normp:view(n,1,1):expand(n,d,1),gradOutput)
     self.buffer:abs(input):pow(self.p-2):cmul(input)
   end
   -- compute cross term in two steps
-  self.cross = self.cross or input.new()
   self.cross:resize(n,1,1)
-
   local b1 = self.buffer:view(n,d,1)
   local b2 = input:view(n,1,d)
   -- instead of having a huge temporary matrix (b1*b2),
