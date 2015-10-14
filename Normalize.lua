@@ -14,6 +14,7 @@ local function updateOutputInf(self,input)
 
   self.buffer:abs(input)
   torch.max(self.norm, self._indices, self.buffer, 2)
+  self.norm:add(self.eps)
 end
 
 local function updateOutputLp(self,input)
@@ -74,6 +75,7 @@ function Normalize:updateGradInput(input, gradOutput)
   gradOutput = gradOutput:view(n,d,1)
 
   if self.p == math.huge then
+    -- specialization for the inf case
     self.gradInput:cmul(self.norm:view(n,1,1):expand(n,d,1),gradOutput)
     self.buffer:resizeAs(input):zero()
     self.cross:resize(n,1)

@@ -950,6 +950,15 @@ B = m:forward(A) -- B is also 3 x 5
 print(torch.norm(B, 2, 2)) -- norms is [1, 1, 1]
 ```
 
+`Normalize` has a specialized implementation for the `inf` norm, which corresponds to the maximum norm.
+```lua
+A = torch.randn(3,5)
+m = nn.Normalize(math.huge) -- uses maximum/inf norm
+B = m:forward(A)
+maxA = A:max(2)
+print(B,maxA)
+```
+
 <a name="nn.MM"></a>
 ## MM ##
 
