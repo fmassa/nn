@@ -48,7 +48,7 @@ temp_str[2] = string.gsub(temp_str[2],'THTensor','THFloatTensor')
 ffi.cdef(table.concat(temp_str))
 
 
-local ok,err = pcall(function() THNN.C = ffi.load('libTHNN') end)
+local ok,err = pcall(function() THNN.C = ffi.load('../THNN/libTHNN.so') end)
 if not ok then
   print(err)
   error('Ops')
