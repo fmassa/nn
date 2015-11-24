@@ -6,12 +6,6 @@
 # include <windows.h>
 #endif
 
-
-#include <TH/TH.h>
-
-
-typedef void THNNState;
-
 /* note: due to write issues, this one cannot be parallelized as well as unfolded_copy */
 static void nn_(unfolded_acc)(THTensor *finput, THTensor *input,
                                int kW, int kH,
@@ -169,7 +163,7 @@ static void nn_(SpatialConvolutionMM_updateOutput_frame)(THTensor *input, THTens
   THTensor_(free)(output2d);
 }
 
-int THNN_(SpatialConvolution_updateOutput)(THNNState* state,
+void THNN_(SpatialConvolution_updateOutput)(THNNState* state,
                                            THTensor* input,
                                            THTensor* weight,
                                            THTensor* bias,
@@ -218,7 +212,6 @@ int THNN_(SpatialConvolution_updateOutput)(THNNState* state,
     THTensor_(free)(output_t);
     THTensor_(free)(finput_t);
   }
-  return 0;
 }
 
 static void nn_(SpatialConvolutionMM_updateGradInput_frame)(THTensor *gradInput, THTensor *gradOutput, THTensor *weight, THTensor *fgradInput,
@@ -237,7 +230,7 @@ static void nn_(SpatialConvolutionMM_updateGradInput_frame)(THTensor *gradInput,
 
 
 // can avoid having fgradinput by recomputing it in accGradParameters
-int THNN_(SpatialConvolution_updateGradInput)(THNNState* state,
+void THNN_(SpatialConvolution_updateGradInput)(THNNState* state,
                                            THTensor* input,
                                            THTensor* weight,
                                            THTensor* bias,
@@ -271,7 +264,6 @@ int THNN_(SpatialConvolution_updateGradInput)(THNNState* state,
     }
 
   THTensor_(transpose)(weight, weight, 0, 1);
-  return 0;
 }
 
 
@@ -301,7 +293,7 @@ static void nn_(SpatialConvolutionMM_accGradParameters_frame)(THTensor *gradOutp
 }
 
 
-int THNN_(SpatialConvolution_accGradParameters)(THNNState* state,
+void THNN_(SpatialConvolution_accGradParameters)(THNNState* state,
                                            THTensor* input,
                                            THTensor* gradWeight,
                                            THTensor* gradBias,
@@ -323,8 +315,6 @@ int THNN_(SpatialConvolution_accGradParameters)(THNNState* state,
     THTensor_(free)(gradOutput_t);
     THTensor_(free)(finput_t);
   }
-
-  return 0;
 }
 
 #endif

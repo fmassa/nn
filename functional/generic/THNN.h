@@ -1,9 +1,11 @@
-local ffi = require "ffi"
-ffi.NULL = ffi.NULL or nil
+#ifndef TH_GENERIC_FILE
+#define TH_GENERIC_FILE "generic/THNN.h"
+#else
 
-local base_str = [[
-typedef void THNNState;
-void THNN_TYPESpatialConvolution_updateOutput(THNNState* state,
+
+
+
+TH_API void THNN_(SpatialConvolution_updateOutput)(THNNState* state,
                                            THTensor* input,
                                            THTensor* weight,
                                            THTensor* bias,
@@ -12,8 +14,7 @@ void THNN_TYPESpatialConvolution_updateOutput(THNNState* state,
                                            int kW,   int kH,
                                            int dW,   int dH,
                                            int padW, int padH);
-
-void THNN_TYPESpatialConvolution_updateGradInput(THNNState* state,
+TH_API void THNN_(SpatialConvolution_updateGradInput)(THNNState* state,
                                            THTensor* input,
                                            THTensor* weight,
                                            THTensor* bias,
@@ -24,8 +25,7 @@ void THNN_TYPESpatialConvolution_updateGradInput(THNNState* state,
                                            int kW,   int kH,
                                            int dW,   int dH,
                                            int padW, int padH);
-
-void THNN_TYPESpatialConvolution_accGradParameters(THNNState* state,
+TH_API void THNN_(SpatialConvolution_accGradParameters)(THNNState* state,
                                            THTensor* input,
                                            THTensor* gradWeight,
                                            THTensor* gradBias,
@@ -33,25 +33,4 @@ void THNN_TYPESpatialConvolution_accGradParameters(THNNState* state,
                                            THTensor* finput,
                                            real scale);
 
-]]
-
-local temp_str = {}
-
-temp_str[1] = string.gsub(base_str,'TYPE','Double')
-temp_str[1] = string.gsub(temp_str[1],'real','double')
-temp_str[1] = string.gsub(temp_str[1],'THTensor','THDoubleTensor')
-
-temp_str[2] = string.gsub(base_str,'TYPE','Float')
-temp_str[2] = string.gsub(temp_str[2],'real','float')
-temp_str[2] = string.gsub(temp_str[2],'THTensor','THFloatTensor')
-
-ffi.cdef(table.concat(temp_str))
-
-
-local ok,err = pcall(function() THNN.C = ffi.load('libTHNN') end)
-if not ok then
-  print(err)
-  error('Ops')
-end
---local C = ffi.load(paths.cwd() .. '/libTHNN.so')
-
+#endif
