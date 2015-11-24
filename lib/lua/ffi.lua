@@ -1,6 +1,4 @@
-local THNN = require 'nn.lib.lua.env'
 local ffi = require "ffi"
-ffi.NULL = ffi.NULL or nil
 
 local base_str = [[
 typedef void THNNState;
@@ -37,7 +35,7 @@ void THNN_TYPESpatialConvolution_accGradParameters(THNNState* state,
 int THNN_TYPEAbs_updateOutput(THNNState* state, THTensor *input, THTensor *output);
 int THNN_TYPEAbs_updateGradInput(THNNState* state, THTensor *input, THTensor *gradOutput, THTensor *gradInput);
 
-int THNN_TYPEAbsCriterion_updateOutput(THNNState* state, THTensor *input, THTensor *target, bool sizeAverage, double *output);
+int THNN_TYPEAbsCriterion_updateOutput(THNNState* state, THTensor *input, THTensor *target, bool sizeAverage, real *output);
 int THNN_TYPEAbsCriterion_updateGradInput(THNNState* state, THTensor *input, THTensor *target, bool sizeAverage, THTensor *gradInput);
 
 int THNN_TYPEClassNLLCriterion_updateOutput(THNNState* state, THTensor *input, THLongTensor *target, bool sizeAverage, THTensor *weights, THTensor *total_weight, THTensor *output);
@@ -58,7 +56,7 @@ temp_str[2] = string.gsub(temp_str[2],'THTensor','THFloatTensor')
 ffi.cdef(table.concat(temp_str))
 
 
-local ok,err = pcall(function() THNN.C = ffi.load('libTHNN.so') end)
+local ok,err = pcall(function() THNN.C = ffi.load('../THNN/libTHNN.so') end) -- fix path later
 if not ok then
   print(err)
   error('Ops')

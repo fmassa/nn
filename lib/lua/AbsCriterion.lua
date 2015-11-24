@@ -1,7 +1,3 @@
-local nn = require 'nn'
-local ffi = require 'ffi'
-local THNN = require 'nn.lib.lua.env'
-
 local AbsCriterion, parent = torch.class('THNN.AbsCriterion', 'nn.Criterion', THNN)
 
 function AbsCriterion:__init()
@@ -10,7 +6,7 @@ function AbsCriterion:__init()
 end
 
 function AbsCriterion:updateOutput(input, target)
-   local output = ffi.new 'double[1]'
+   self.output_tensor =  self.output_tensor or input.new(1)
    THNN.errcheck(
       'THNN_RealAbsCriterion_updateOutput', 
       input:type(), 
@@ -18,9 +14,9 @@ function AbsCriterion:updateOutput(input, target)
       input:cdata(), 
       target:cdata(),
       self.sizeAverage,
-      output
+      self.output_tensor:data()
    )
-   self.output = output[0]
+   self.output = self.output_tensor[1]
    return self.output
 end
 

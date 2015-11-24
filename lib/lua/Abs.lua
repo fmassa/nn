@@ -1,6 +1,3 @@
-local nn = require 'nn'
-local THNN = require 'nn.lib.lua.env'
-
 local Abs, parent = torch.class('THNN.Abs', 'nn.Module', THNN)
 
 function Abs:__init()

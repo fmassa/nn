@@ -1,7 +1,3 @@
-local nn = require 'nn'
-local ffi = require 'ffi'
-local THNN = require 'nn.lib.lua.env'
-
 local ClassNLLCriterion, parent = torch.class('THNN.ClassNLLCriterion', 'nn.Criterion', THNN)
 
 function ClassNLLCriterion:__init(weights, sizeAverage)

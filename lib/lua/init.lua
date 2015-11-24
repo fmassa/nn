@@ -1,5 +1,6 @@
 require 'torch'
-local THNN = require 'nn.lib.lua.env'
+THNN = {} -- improve it later
+require 'nn'
 local ffi = require 'ffi'
 
 include 'ffi.lua'
