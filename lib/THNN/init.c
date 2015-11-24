@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include "TH.h"
 #include "THNN.h"
 
@@ -12,3 +13,11 @@
 #include "generic/SpatialConvolutionMM.c"
 #include "THGenerateFloatTypes.h"
 
+#include "generic/Abs.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/AbsCriterion.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/ClassNLLCriterion.c"
+#include "THGenerateFloatTypes.h"
