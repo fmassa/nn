@@ -1,14 +1,14 @@
-local AbsCriterion, parent = torch.class('THNN.AbsCriterion', 'nn.Criterion', THNN)
+local DistKLDivCriterion, parent = torch.class('THNN.DistKLDivCriterion', 'nn.Criterion', THNN)
 
-function AbsCriterion:__init()
+function DistKLDivCriterion:__init()
    parent.__init(self)
    self.sizeAverage = true
 end
 
-function AbsCriterion:updateOutput(input, target)
+function DistKLDivCriterion:updateOutput(input, target)
    self.output_tensor = self.output_tensor or input.new(1)
    THNN.errcheck(
-      'THNN_RealAbsCriterion_updateOutput', 
+      'THNN_RealDistKLDivCriterion_updateOutput', 
       input:type(), 
       THNN.NULL, 
       input:cdata(), 
@@ -20,9 +20,9 @@ function AbsCriterion:updateOutput(input, target)
    return self.output
 end
 
-function AbsCriterion:updateGradInput(input, target)
+function DistKLDivCriterion:updateGradInput(input, target)
    THNN.errcheck(
-      'THNN_RealAbsCriterion_updateGradInput', 
+      'THNN_RealDistKLDivCriterion_updateGradInput', 
       input:type(), 
       THNN.NULL, 
       input:cdata(), 

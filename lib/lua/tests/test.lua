@@ -99,6 +99,49 @@ function nntest.ClassNLLCriterion()
 
 end
 
+function nntest.DistKLDivCriterion()
+   local input = torch.rand(10)
+   local target = input:clone():add(torch.rand(10))
+   local cri = THNN.DistKLDivCriterion(true)  -- sizeAverage = true
+   criterionJacobianTest1D(cri, input, target)
+   cri = THNN.DistKLDivCriterion(false)  -- sizeAverage = false
+   criterionJacobianTest1D(cri, input, target)
+   
+   -- compare against nn
+   local cri = THNN.DistKLDivCriterion()
+   local nncri = nn.DistKLDivCriterion()
+   local output = cri:forward(input,target)
+   local output_nn = nncri:forward(input,target)
+   local err = math.abs(output-output_nn)
+
+   mytester:assertlt(err, high_precision ,  'error comparing against nn ')
+end
+
+function nntest.HardShrink()
+   local ini = math.random(3,5)
+   local inj = math.random(3,5)
+   local ink = math.random(3,5)
+   local input = torch.Tensor(ink, inj, ini):zero()
+
+   local lambda = math.random()/2
+   local module = THNN.HardShrink(lambda)
+
+   local err = nn.Jacobian.testJacobian(module, input)
+   mytester:assertlt(err, precision, 'error on state ')
+
+   local ferr, berr = nn.Jacobian.testIO(module, input)
+   mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
+   
+   -- compare against nn
+   local nnmodule = nn.HardShrink(lambda)
+   local output = module:forward(input)
+   local output_nn = nnmodule:forward(input)
+   local err = (output-output_nn):abs():max()
+
+   mytester:assertlt(err, high_precision ,  'error comparing against nn ')
+end
+
 function nntest.SpatialConvolutionMM()
    local from = math.random(2,5)
    local to = math.random(1,5)

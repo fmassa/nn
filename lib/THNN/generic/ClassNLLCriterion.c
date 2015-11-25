@@ -2,7 +2,7 @@
 #define TH_GENERIC_FILE "generic/ClassNLLCriterion.c"
 #else
 
-int THNN_(ClassNLLCriterion_updateOutput)(THNNState* state, THTensor *input, THLongTensor *target, bool sizeAverage, THTensor *weights, THTensor *total_weight, THTensor *output)
+void THNN_(ClassNLLCriterion_updateOutput)(THNNState* state, THTensor *input, THLongTensor *target, bool sizeAverage, THTensor *weights, THTensor *total_weight, THTensor *output)
 {
   int n_dims = THTensor_(nDimension)(input);
   int n_classes = THTensor_(size)(input, n_dims - 1);
@@ -55,11 +55,9 @@ int THNN_(ClassNLLCriterion_updateOutput)(THNNState* state, THTensor *input, THL
   }
   THTensor_(free)(input);
   THLongTensor_free(target);
-
-  return 0;
 }
 
-int THNN_(ClassNLLCriterion_updateGradInput)(THNNState* state, THTensor *input, THLongTensor *target, bool sizeAverage, THTensor *weights, THTensor *total_weight, THTensor *gradInput)
+void THNN_(ClassNLLCriterion_updateGradInput)(THNNState* state, THTensor *input, THLongTensor *target, bool sizeAverage, THTensor *weights, THTensor *total_weight, THTensor *gradInput)
 {
   int n_dims = THTensor_(nDimension)(input);
   int n_classes = THTensor_(size)(input, n_dims - 1);
@@ -71,7 +69,7 @@ int THNN_(ClassNLLCriterion_updateGradInput)(THNNState* state, THTensor *input, 
   real* total_weight_data = THTensor_(data)(total_weight);
 
   if (!(*total_weight_data > 0)) {
-    return 0;
+    return;
   }
 
   if (THLongTensor_nDimension(target) > 1) {
@@ -119,8 +117,6 @@ int THNN_(ClassNLLCriterion_updateGradInput)(THNNState* state, THTensor *input, 
   if (weights) {
     THTensor_(free)(weights);
   }
-
-  return 0;
 }
 
 #endif

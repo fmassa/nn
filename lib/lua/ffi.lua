@@ -32,15 +32,20 @@ void THNN_TYPESpatialConvolution_accGradParameters(THNNState* state,
                                            THTensor* finput,
                                            real scale);
 
-int THNN_TYPEAbs_updateOutput(THNNState* state, THTensor *input, THTensor *output);
-int THNN_TYPEAbs_updateGradInput(THNNState* state, THTensor *input, THTensor *gradOutput, THTensor *gradInput);
+void THNN_TYPEAbs_updateOutput(THNNState* state, THTensor *input, THTensor *output);
+void THNN_TYPEAbs_updateGradInput(THNNState* state, THTensor *input, THTensor *gradOutput, THTensor *gradInput);
 
-int THNN_TYPEAbsCriterion_updateOutput(THNNState* state, THTensor *input, THTensor *target, bool sizeAverage, real *output);
-int THNN_TYPEAbsCriterion_updateGradInput(THNNState* state, THTensor *input, THTensor *target, bool sizeAverage, THTensor *gradInput);
+void THNN_TYPEAbsCriterion_updateOutput(THNNState* state, THTensor *input, THTensor *target, bool sizeAverage, real *output);
+void THNN_TYPEAbsCriterion_updateGradInput(THNNState* state, THTensor *input, THTensor *target, bool sizeAverage, THTensor *gradInput);
 
-int THNN_TYPEClassNLLCriterion_updateOutput(THNNState* state, THTensor *input, THLongTensor *target, bool sizeAverage, THTensor *weights, THTensor *total_weight, THTensor *output);
-int THNN_TYPEClassNLLCriterion_updateGradInput(THNNState* state, THTensor *input, THLongTensor *target, bool sizeAverage, THTensor *weights, THTensor *total_weight, THTensor *gradInput);
+void THNN_TYPEClassNLLCriterion_updateOutput(THNNState* state, THTensor *input, THLongTensor *target, bool sizeAverage, THTensor *weights, THTensor *total_weight, THTensor *output);
+void THNN_TYPEClassNLLCriterion_updateGradInput(THNNState* state, THTensor *input, THLongTensor *target, bool sizeAverage, THTensor *weights, THTensor *total_weight, THTensor *gradInput);
 
+void THNN_TYPEDistKLDivCriterion_updateOutput(THNNState* state, THTensor *input, THTensor *target, bool sizeAverage, real *output);
+void THNN_TYPEDistKLDivCriterion_updateGradInput(THNNState* state, THTensor *input, THTensor *target, bool sizeAverage, THTensor *gradInput);
+
+void THNN_TYPEHardShrink_updateOutput(THNNState* state, THTensor *input, real lambda, THTensor *output);
+void THNN_TYPEHardShrink_updateGradInput(THNNState* state, THTensor *input, real lambda, THTensor *gradOutput, THTensor *gradInput);
 ]]
 
 local temp_str = {}

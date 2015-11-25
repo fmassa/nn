@@ -34,5 +34,7 @@ include 'Abs.lua'
 include 'AbsCriterion.lua'
 include 'ClassNLLCriterion.lua'
 include 'SpatialConvolutionMM.lua'
+include 'DistKLDivCriterion.lua'
+include 'HardShrink.lua'
 
 return THNN
