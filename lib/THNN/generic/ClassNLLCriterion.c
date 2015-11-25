@@ -2,7 +2,7 @@
 #define TH_GENERIC_FILE "generic/ClassNLLCriterion.c"
 #else
 
-void THNN_(ClassNLLCriterion_updateOutput)(THNNState* state, THTensor *input, THLongTensor *target, THTensor *output, bool sizeAverage, THTensor *weights, THTensor *total_weight)
+void THNN_(ClassNLLCriterion_updateOutput)(THNNState *state, THTensor *input, THLongTensor *target, THTensor *output, bool sizeAverage, THTensor *weights, THTensor *total_weight)
 {
   int n_dims = THTensor_(nDimension)(input);
   int n_classes = THTensor_(size)(input, n_dims - 1);
@@ -57,7 +57,7 @@ void THNN_(ClassNLLCriterion_updateOutput)(THNNState* state, THTensor *input, TH
   THLongTensor_free(target);
 }
 
-void THNN_(ClassNLLCriterion_updateGradInput)(THNNState* state, THTensor *input, THLongTensor *target, THTensor *gradInput, bool sizeAverage, THTensor *weights, THTensor *total_weight)
+void THNN_(ClassNLLCriterion_updateGradInput)(THNNState *state, THTensor *input, THLongTensor *target, THTensor *gradInput, bool sizeAverage, THTensor *weights, THTensor *total_weight)
 {
   int n_dims = THTensor_(nDimension)(input);
   int n_classes = THTensor_(size)(input, n_dims - 1);
@@ -66,7 +66,7 @@ void THNN_(ClassNLLCriterion_updateGradInput)(THNNState* state, THTensor *input,
     THError("gradInput must be contiguous");
   }
 
-  real* total_weight_data = THTensor_(data)(total_weight);
+  real *total_weight_data = THTensor_(data)(total_weight);
 
   if (!(*total_weight_data > 0)) {
     return;
@@ -99,7 +99,7 @@ void THNN_(ClassNLLCriterion_updateGradInput)(THNNState* state, THTensor *input,
     int n_target = THTensor_(size)(input, 1);
 
     int i;
-    for(i = 0; i < batch_size; i++){
+    for (i = 0; i < batch_size; i++){
       int cur_target = target_data[i] - 1;
 
       THAssert(cur_target >= 0 && cur_target < n_classes);

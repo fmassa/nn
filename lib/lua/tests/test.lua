@@ -157,7 +157,7 @@ function nntest.HardTanh()
    mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
    mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
    
-    -- compare against nn
+   -- compare against nn
    local nnmodule = nn.HardTanh()
    local output = module:forward(input)
    local output_nn = nnmodule:forward(input)
@@ -172,13 +172,153 @@ function nntest.L1Cost()
 
    local module = THNN.L1Cost()
 
-    -- compare against nn
+   -- compare against nn
    local nnmodule = nn.L1Cost()
    local output = module:forward(input)
    local output_nn = nnmodule:forward(input)
    local err = math.abs(output-output_nn)
 
    mytester:assertlt(err, high_precision ,  'error comparing against nn ')
+end
+
+function nntest.LogSigmoid()
+   local ini = math.random(3,5)
+   local inj = math.random(3,5)
+   local ink = math.random(3,5)
+   local input = torch.Tensor(ini,inj,ink):zero()
+   local module = THNN.LogSigmoid()
+
+   local err = jac.testJacobian(module,input)
+   mytester:assertlt(err,precision, 'error on state ')
+
+   local ferr,berr = jac.testIO(module,input)
+   mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
+   
+   -- compare against nn
+   local nnmodule = nn.LogSigmoid()
+   local output = module:forward(input)
+   local output_nn = nnmodule:forward(input)
+   local err = (output-output_nn):abs():max()
+
+   mytester:assertlt(err, high_precision ,  'error comparing against nn ')
+end
+
+function nntest.LogSoftmax()
+   local ini = math.random(3,5)
+   local inj = math.random(3,5)
+   local input = torch.Tensor(ini,inj):zero()
+   local module = THNN.LogSoftMax()
+
+   local err = jac.testJacobian(module,input)
+   mytester:assertlt(err, 1e-3, 'error on state ')
+
+   local ferr,berr = jac.testIO(module,input)
+   mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
+
+   -- compare against nn
+   local nnmodule = nn.LogSoftMax()
+   local output = module:forward(input)
+   local output_nn = nnmodule:forward(input)
+   local err = (output-output_nn):abs():max()
+
+   mytester:assertlt(err, high_precision ,  'error comparing against nn ')
+end
+
+function nntest.LookupTable()
+   local totalIndex = math.random(6,9)
+   local nIndex = math.random(3,5)
+   local entry_size = math.random(2,5)
+   local input = torch.randperm(totalIndex):narrow(1,1,nIndex):int()
+   local module = THNN.LookupTable(totalIndex, entry_size)
+   local minval = 1
+   local maxval = totalIndex
+
+   local output = module:forward(input)
+   module:backwardUpdate(input, output, 0.1)
+   input:zero()
+
+   -- 1D
+   local err = jac.testJacobianParameters(module, input, module.weight, module.gradWeight, minval, maxval)
+   mytester:assertlt(err,precision, '1D error on weight ')
+
+   local err = jac.testJacobianUpdateParameters(module, input, module.weight, minval, maxval)
+   mytester:assertlt(err,precision, '1D error on weight [direct update] ')
+
+   module.gradWeight:zero()
+   for t,err in pairs(jac.testAllUpdate(module, input, 'weight', 'gradWeight')) do
+      mytester:assertlt(err, precision, string.format(
+                         '1D error on weight [%s]', t))
+   end
+
+   -- 2D
+   local nframe = math.random(2,5)
+   local input = torch.IntTensor(nframe, nIndex):zero()
+
+   local err = jac.testJacobianParameters(module, input, module.weight, module.gradWeight, minval, maxval)
+   mytester:assertlt(err,precision, '2D error on weight ')
+
+   local err = jac.testJacobianUpdateParameters(module, input, module.weight, minval, maxval)
+   mytester:assertlt(err,precision, '2D error on weight [direct update] ')
+
+   module.gradWeight:zero()
+   for t,err in pairs(jac.testAllUpdate(module, input, 'weight', 'gradWeight')) do
+      mytester:assertlt(err, precision, string.format(
+                         '2D error on weight [%s]', t))
+   end
+
+   -- IO
+   module.gradInput = torch.Tensor(3,4):zero() --fixes an error
+   local ferr,berr = jac.testIO(module,input,minval,maxval)
+   mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
+
+   -- accUpdate
+   module:accUpdateOnly()
+   mytester:assert(not module.gradWeight, 'gradWeight is nil')
+   module:float()
+   local output = module:forward(input)
+   module:backwardUpdate(input, output, 0.1)
+   
+   -- compare against nn
+   local nnmodule = nn.LookupTable(totalIndex, entry_size):float()
+   nnmodule.weight = module.weight
+   local output = module:forward(input)
+   local output_nn = nnmodule:forward(input)
+   local err = (output-output_nn):abs():max()
+
+   mytester:assertlt(err, high_precision, 'error comparing against nn ')
+end
+
+function nntest.MarginCriterion()
+   local input = torch.rand(100)
+   local target = input:clone():add(torch.rand(100))
+   local cri = THNN.MarginCriterion()
+   criterionJacobianTest1D(cri, input, target)
+   
+   -- compare against nn
+   local nncri = nn.MarginCriterion()
+   local output = cri:forward(input,target)
+   local output_nn = nncri:forward(input,target)
+   local err = math.abs(output-output_nn)
+
+   mytester:assertlt(err, high_precision, 'error comparing against nn ')
+end
+
+function nntest.MSECriterion()
+   local input = torch.rand(10)
+   local target = input:clone():add(torch.rand(10))
+   local cri = THNN.MSECriterion()
+   criterionJacobianTest1D(cri, input, target)
+   
+   -- compare against nn
+   local nncri = nn.MSECriterion()
+   local output = cri:forward(input,target)
+   local output_nn = nncri:forward(input,target)
+   local err = math.abs(output-output_nn)
+
+   mytester:assertlt(err, high_precision, 'error comparing against nn ')
 end
 
 function nntest.SpatialConvolutionMM()

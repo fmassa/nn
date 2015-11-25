@@ -22,6 +22,8 @@ local function errcheck(f, type, ...)
     fname = string.gsub(f,'Real','Float')
   elseif type == 'torch.DoubleTensor' then
     fname = string.gsub(f,'Real','Double')
+  elseif type == 'torch.DoubleTensor' then
+    fname = string.gsub(f,'Real','Double')
   else
     error('Type not supported: '..f)
   end
@@ -45,6 +47,11 @@ include 'DistKLDivCriterion.lua'
 include 'HardShrink.lua'
 include 'HardTanh.lua'
 include 'L1Cost.lua'
+include 'LogSigmoid.lua'
+include 'LogSoftMax.lua'
+include 'LookupTable.lua'
+include 'MarginCriterion.lua'
+include 'MSECriterion.lua'
 include 'SpatialConvolutionMM.lua'
 include 'SpatialMaxPooling.lua'
 include 'Threshold.lua'

@@ -2,27 +2,28 @@
 #define TH_GENERIC_FILE "generic/DistKLDivCriterion.c"
 #else
 
-void THNN_(DistKLDivCriterion_updateOutput)(THNNState* state, THTensor *input, THTensor *target, real *output, bool sizeAverage)
+void THNN_(DistKLDivCriterion_updateOutput)(THNNState *state, THTensor *input, THTensor *target, real *output, bool sizeAverage)
 {
-  real sum;
+  real sum = 0;
 
-  sum = 0;
   TH_TENSOR_APPLY2(real, input, real, target,
-                   sum += *target_data > 0 ? *target_data * (log(*target_data) - *input_data) : 0;)
+    sum += *target_data > 0 ? *target_data * (log(*target_data) - *input_data) : 0;
+  )
 
-  if(sizeAverage)
+  if (sizeAverage)
     sum /= THTensor_(nElement)(input);
 
   *output = sum;
 }
 
-void THNN_(DistKLDivCriterion_updateGradInput)(THNNState* state, THTensor *input, THTensor *target, THTensor *gradInput, bool sizeAverage)
+void THNN_(DistKLDivCriterion_updateGradInput)(THNNState *state, THTensor *input, THTensor *target, THTensor *gradInput, bool sizeAverage)
 {
   real norm = (sizeAverage ? 1./((real)THTensor_(nElement)(input)) : 1.);
 
   THTensor_(resizeAs)(gradInput, input);
   TH_TENSOR_APPLY3(real, gradInput, real, input, real, target,
-                   *gradInput_data = *target_data > 0 ? norm * (-*target_data) : 0;)
+    *gradInput_data = *target_data > 0 ? norm * (-*target_data) : 0;
+  )
 }
 
 #endif

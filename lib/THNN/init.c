@@ -7,12 +7,6 @@
 #define nn_(NAME) TH_CONCAT_3(nn_, Real, NAME)
 #define THNN_(NAME) TH_CONCAT_3(THNN_, Real, NAME)
 
-#include "generic/THNN.h"
-#include "THGenerateFloatTypes.h"
-
-#include "generic/SpatialConvolutionMM.c"
-#include "THGenerateFloatTypes.h"
-
 #include "generic/Abs.c"
 #include "THGenerateFloatTypes.h"
 
@@ -32,6 +26,24 @@
 #include "THGenerateFloatTypes.h"
 
 #include "generic/HardShrink.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/LogSigmoid.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/LogSoftMax.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/LookupTable.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/MarginCriterion.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/MSECriterion.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/SpatialConvolutionMM.c"
 #include "THGenerateFloatTypes.h"
 
 #include "generic/SpatialMaxPooling.c"
