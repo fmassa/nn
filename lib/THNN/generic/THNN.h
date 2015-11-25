@@ -144,7 +144,7 @@ TH_API void THNN_(Threshold_updateOutput)(
           THTensor* output,
           real val,
           real threshold,
-          int inPlace);
+          bool inPlace);
 
 TH_API void THNN_(Threshold_updateGradInput)(
           THNNState* state,
@@ -152,6 +152,6 @@ TH_API void THNN_(Threshold_updateGradInput)(
           THTensor* gradOutput,
           THTensor* gradInput,
           real threshold,
-          int inPlace);
+          bool inPlace);
 
 #endif
