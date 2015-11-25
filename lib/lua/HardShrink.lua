@@ -7,25 +7,25 @@ end
 
 function HardShrink:updateOutput(input)
    THNN.errcheck(
-     'THNN_RealHardShrink_updateOutput', 
-     input:type(), 
-     THNN.NULL, 
-     input:cdata(), 
-     self.lambda,
-     self.output:cdata()
+     'THNN_RealHardShrink_updateOutput',
+     input:type(),
+     THNN.NULL,
+     input:cdata(),
+     self.output:cdata(),
+     self.lambda
    )
    return self.output
 end
 
 function HardShrink:updateGradInput(input, gradOutput)
    THNN.errcheck(
-     'THNN_RealHardShrink_updateGradInput', 
-     input:type(), 
-     THNN.NULL, 
-     input:cdata(), 
-     self.lambda,
+     'THNN_RealHardShrink_updateGradInput',
+     input:type(),
+     THNN.NULL,
+     input:cdata(),
      gradOutput:cdata(),
-     self.gradInput:cdata()
+     self.gradInput:cdata(),
+     self.lambda
    )
    return self.gradInput
 end

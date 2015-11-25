@@ -27,7 +27,7 @@ static void nn_(unfolded_acc)(THTensor *finput, THTensor *input,
 #pragma omp parallel for private(nip)
   for(nip = 0; nip < nInputPlane; nip++)
   {
-    size_t kw, kh, y, x; 
+    size_t kw, kh, y, x;
     long long ix = 0, iy = 0;
     for(kh = 0; kh < kH; kh++)
     {
@@ -165,10 +165,10 @@ static void nn_(SpatialConvolutionMM_updateOutput_frame)(THTensor *input, THTens
 
 void THNN_(SpatialConvolution_updateOutput)(THNNState* state,
                                            THTensor* input,
+                                           THTensor* output,
                                            THTensor* weight,
                                            THTensor* bias,
                                            THTensor* finput,
-                                           THTensor* output,
                                            int kW,   int kH,
                                            int dW,   int dH,
                                            int padW, int padH)
@@ -235,12 +235,12 @@ static void nn_(SpatialConvolutionMM_updateGradInput_frame)(THTensor *gradInput,
 // can avoid having fgradinput by recomputing it in accGradParameters
 void THNN_(SpatialConvolution_updateGradInput)(THNNState* state,
                                            THTensor* input,
+                                           THTensor* gradOutput,
+                                           THTensor* gradInput,
                                            THTensor* weight,
                                            THTensor* bias,
-                                           THTensor* gradOutput,
                                            THTensor* finput,
                                            THTensor* fgradInput,
-                                           THTensor* gradInput,
                                            int kW,   int kH,
                                            int dW,   int dH,
                                            int padW, int padH)
@@ -298,9 +298,9 @@ static void nn_(SpatialConvolutionMM_accGradParameters_frame)(THTensor *gradOutp
 
 void THNN_(SpatialConvolution_accGradParameters)(THNNState* state,
                                            THTensor* input,
+                                           THTensor* gradOutput,
                                            THTensor* gradWeight,
                                            THTensor* gradBias,
-                                           THTensor* gradOutput,
                                            THTensor* finput,
                                            real scale)
 {

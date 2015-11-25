@@ -3,7 +3,7 @@ local SpatialConvolutionMM, parent = torch.class('THNN.SpatialConvolutionMM', 'n
 
 function SpatialConvolutionMM:__init(nInputPlane, nOutputPlane, kW, kH, dW, dH, padW, padH)
    parent.__init(self)
-   
+
    dW = dW or 1
    dH = dH or 1
 
@@ -24,7 +24,7 @@ function SpatialConvolutionMM:__init(nInputPlane, nOutputPlane, kW, kH, dW, dH, 
 
    self.finput = torch.Tensor()
    self.fgradInput = torch.Tensor()
-   
+
    self:reset()
 end
 
@@ -40,7 +40,7 @@ function SpatialConvolutionMM:reset(stdv)
       end)
       self.bias:apply(function()
          return torch.uniform(-stdv, stdv)
-      end)  
+      end)
    else
       self.weight:uniform(-stdv, stdv)
       self.bias:uniform(-stdv, stdv)
@@ -81,10 +81,10 @@ function SpatialConvolutionMM:updateOutput(input)
       input:type(),
       THNN.NULL,
       input:cdata(),
+      self.output:cdata(),
       self.weight:cdata(),
       self.bias:cdata(),
       self.finput:cdata(),
-      self.output:cdata(),
       self.kW,self.kH,
       self.dW,self.dH,
       self.padW,self.padH
@@ -113,12 +113,12 @@ function SpatialConvolutionMM:updateGradInput(input, gradOutput)
          input:type(),
          THNN.NULL,
          input:cdata(),
+         gradOutput:cdata(),
+         self.gradInput:cdata(),
          self.weight:cdata(),
          self.bias:cdata(),
-         gradOutput:cdata(),
          self.finput:cdata(),
          self.fgradInput:cdata(),
-         self.gradInput:cdata(),
          self.kW,self.kH,
          self.dW,self.dH,
          self.padW,self.padH
@@ -148,9 +148,9 @@ function SpatialConvolutionMM:accGradParameters(input, gradOutput, scale)
       input:type(),
       THNN.NULL,
       input:cdata(),
+      gradOutput:cdata(),
       self.gradWeight:cdata(),
       self.gradBias:cdata(),
-      gradOutput:cdata(),
       self.finput:cdata(),
       scale)
 end
