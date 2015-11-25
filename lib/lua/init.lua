@@ -47,5 +47,6 @@ include 'HardTanh.lua'
 include 'L1Cost.lua'
 include 'SpatialConvolutionMM.lua'
 include 'SpatialMaxPooling.lua'
+include 'Threshold.lua'
 
 return THNN

@@ -313,6 +313,32 @@ function nntest.SpatialMaxPooling()
   end
 end
 
+function nntest.Threshold()
+   local ini = math.random(3,5)
+   local inj = math.random(3,5)
+   local ink = math.random(3,5)
+   local input = torch.Tensor(ink, inj, ini):zero()
+
+   local th = torch.uniform(-2,2)
+   local v = torch.uniform(-2,2)
+   local module = THNN.Threshold(th,v)
+
+   local err = nn.Jacobian.testJacobian(module, input)
+   mytester:assertlt(err, precision, 'error on state ')
+
+   local ferr, berr = nn.Jacobian.testIO(module, input)
+   mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
+
+    -- compare against nn
+   local nnmodule = nn.Threshold(th,v)
+   local output = module:forward(input)
+   local output_nn = nnmodule:forward(input)
+   local err = (output-output_nn):abs():max()
+
+   mytester:assertlt(err, high_precision ,  'error comparing against nn ')
+end
+
 
 mytester:add(nntest)
 --if not nn then
