@@ -174,6 +174,9 @@ void THNN_(SpatialConvolution_updateOutput)(THNNState* state,
                                            int padW, int padH)
 {
 
+  if (input->nDimension == 3 || input->nDimension == 4)
+    THError("3D or 4D (batch mode) tensor is expected");
+
   int dimf = 1;
   int dimw = 3;
   int dimh = 2;

@@ -5,7 +5,15 @@ local ffi = require 'ffi'
 
 include 'ffi.lua'
 
+-- we should replace all instances of THNN.NULL in the
+-- function calls by THNN.getState()
+-- still need to figure out if need to pass the tensor
+-- type
 THNN.NULL = ffi.NULL or nil
+function THNN.getState()
+  -- change it 
+  return ffi.NULL or nil
+end
 
 local function errcheck(f, type, ...)
   -- handle different data types here

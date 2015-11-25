@@ -1,3 +1,4 @@
+-- make C version accept non-batched input ?
 local SpatialConvolutionMM, parent = torch.class('THNN.SpatialConvolutionMM', 'nn.Module',THNN)
 
 function SpatialConvolutionMM:__init(nInputPlane, nOutputPlane, kW, kH, dW, dH, padW, padH)
