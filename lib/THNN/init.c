@@ -27,3 +27,6 @@
 
 #include "generic/HardShrink.c"
 #include "THGenerateFloatTypes.h"
+
+#include "generic/SpatialMaxPooling.c"
+#include "THGenerateFloatTypes.h"

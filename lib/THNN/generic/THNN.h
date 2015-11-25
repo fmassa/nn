@@ -98,4 +98,21 @@ TH_API void THNN_(SpatialConvolution_accGradParameters)(
           THTensor* finput,
           real scale);
 
+TH_API void THNN_(SpatialMaxPooling_updateOutput)(
+          THNNState* state,
+          THTensor* input,
+          THTensor* output,
+          int kW, int kH,
+          int dW, int dH,
+          int padW, int padH,
+          int ceil_mode,
+          THTensor* indices);
+TH_API void THNN_(SpatialMaxPooling_updateGradInput)(
+          THNNState* state,
+          THTensor* input,
+          THTensor* gradOutput,
+          THTensor* gradInput,
+          int dW, int dH,
+          THTensor* indices);
+
 #endif

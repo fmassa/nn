@@ -41,8 +41,9 @@ THNN.optionalTensor = optionalTensor
 include 'Abs.lua'
 include 'AbsCriterion.lua'
 include 'ClassNLLCriterion.lua'
-include 'SpatialConvolutionMM.lua'
 include 'DistKLDivCriterion.lua'
 include 'HardShrink.lua'
+include 'SpatialConvolutionMM.lua'
+include 'SpatialMaxPooling.lua'
 
 return THNN

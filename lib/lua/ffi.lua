@@ -46,6 +46,24 @@ void THNN_TYPEDistKLDivCriterion_updateGradInput(THNNState* state, THTensor *inp
 
 void THNN_TYPEHardShrink_updateOutput(THNNState* state, THTensor *input, THTensor *output, real lambda);
 void THNN_TYPEHardShrink_updateGradInput(THNNState* state, THTensor *input, THTensor *gradOutput, THTensor *gradInput, real lambda);
+
+void THNN_TYPESpatialMaxPooling_updateOutput(
+            THNNState* state,
+            THTensor* input,
+            THTensor* output,
+            int kW, int kH,
+            int dW, int dH,
+            int padW, int padH,
+            int ceil_mode,
+            THTensor* indices);
+void THNN_TYPESpatialMaxPooling_updateGradInput(
+          THNNState* state,
+          THTensor* input,
+          THTensor* gradOutput,
+          THTensor* gradInput,
+          int dW, int dH,
+          THTensor* indices);
+
 ]]
 
 local temp_str = {}
