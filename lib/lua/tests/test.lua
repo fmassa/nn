@@ -142,6 +142,45 @@ function nntest.HardShrink()
    mytester:assertlt(err, high_precision ,  'error comparing against nn ')
 end
 
+function nntest.HardTanh()
+   local ini = math.random(3,5)
+   local inj = math.random(3,5)
+   local ink = math.random(3,5)
+   local input = torch.Tensor(ink, inj, ini):zero()
+
+   local module = THNN.HardTanh()
+
+   local err = jac.testJacobian(module, input)
+   mytester:assertlt(err, precision ,  'error on state ')
+
+   local ferr, berr = jac.testIO(module, input)
+   mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
+   
+    -- compare against nn
+   local nnmodule = nn.HardTanh()
+   local output = module:forward(input)
+   local output_nn = nnmodule:forward(input)
+   local err = (output-output_nn):abs():max()
+
+   mytester:assertlt(err, high_precision ,  'error comparing against nn ')
+end
+
+function nntest.L1Cost()
+   local ini = math.random(3,5)
+   local input = torch.rand(ini)
+
+   local module = THNN.L1Cost()
+
+    -- compare against nn
+   local nnmodule = nn.L1Cost()
+   local output = module:forward(input)
+   local output_nn = nnmodule:forward(input)
+   local err = math.abs(output-output_nn)
+
+   mytester:assertlt(err, high_precision ,  'error comparing against nn ')
+end
+
 function nntest.SpatialConvolutionMM()
    local from = math.random(2,5)
    local to = math.random(1,5)

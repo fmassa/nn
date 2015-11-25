@@ -43,6 +43,8 @@ include 'AbsCriterion.lua'
 include 'ClassNLLCriterion.lua'
 include 'DistKLDivCriterion.lua'
 include 'HardShrink.lua'
+include 'HardTanh.lua'
+include 'L1Cost.lua'
 include 'SpatialConvolutionMM.lua'
 include 'SpatialMaxPooling.lua'
 

@@ -25,8 +25,15 @@
 #include "generic/DistKLDivCriterion.c"
 #include "THGenerateFloatTypes.h"
 
+#include "generic/HardTanh.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/L1Cost.c"
+#include "THGenerateFloatTypes.h"
+
 #include "generic/HardShrink.c"
 #include "THGenerateFloatTypes.h"
 
 #include "generic/SpatialMaxPooling.c"
 #include "THGenerateFloatTypes.h"
+
