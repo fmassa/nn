@@ -2,6 +2,9 @@
 #define THNN_H
 
 #include <stdbool.h>
+#include <TH.h>
+
+#define THNN_(NAME) TH_CONCAT_3(THNN_, Real, NAME)
 
 typedef void THNNState;
 
@@ -71,8 +74,6 @@ void THNN_DestroyConvolutionDescriptor(THNN_ConvolutionDescriptor_t *convDesc)
 {
   THFree(convDesc);
 }
-
-#define THNN_(NAME) TH_CONCAT_3(THNN_, Real, NAME)
 
 #include "generic/THNN.h"
 #include <THGenerateFloatTypes.h>
