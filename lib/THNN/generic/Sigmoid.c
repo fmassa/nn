@@ -7,7 +7,7 @@ void THNN_(Sigmoid_updateOutput)(THNNState *state, THTensor *input, THTensor *ou
   THTensor_(resizeAs)(output, input);
 
   TH_TENSOR_APPLY2(real, output, real, input,
-    *output_data = 1./(1. + exp(- *input_data));
+    *output_data = 1. / (1. + exp(- *input_data));
   );
 }
 

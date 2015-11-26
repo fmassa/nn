@@ -12,12 +12,17 @@ function LookupTable:__init(nIndex, nOutput)
 end
 
 function LookupTable:backCompatibility()
-    self._count = self._count or torch.IntTensor()
-    self._input = self._input or torch.LongTensor()
-
-    if self.shouldScaleGradByFreq == nil then
-        self.shouldScaleGradByFreq = false
-    end
+   self._input = self._input or torch.LongTensor()
+   
+   if not self._count then
+      self._count = torch.LongTensor()
+   elseif self._count and torch.isTypeOf(self._count, torch.IntTensor) then
+      self._count = self._count:long()
+   end
+   
+   if not self.shouldScaleGradByFreq then
+      self.shouldScaleGradByFreq = false
+   end
 end
 
 function LookupTable:accUpdateOnly()
@@ -71,7 +76,7 @@ function LookupTable:accGradParameters(input, gradOutput, scale)
 
    THNN.errcheck(
      'THNN_RealLookupTable_accGradParameters',
-     gradOutput:type(),   -- we cannot use input here since it is a LongTensor
+     gradOutput:type(),   -- we cannot use input here since it may be a LongTensor (CPU version)
      THNN.NULL,
      input:cdata(),
      gradOutput:cdata(),
@@ -93,7 +98,7 @@ function LookupTable:type(type, tensorCache)
       self._input = self.weight.new()
    else
       -- self._count and self._input should only be converted if using Cuda
-      self._count = torch.IntTensor()
+      self._count = torch.LongTensor()
       self._input = torch.LongTensor()
    end
 

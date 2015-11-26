@@ -91,7 +91,7 @@ void THNN_(RReLU_updateGradInput)(THNNState *state, THTensor *input, THTensor *g
       TH_TENSOR_APPLY2(real, gradOutput, real, input,
         if (*input_data <= 0)
         {
-         *gradOutput_data = (*gradOutput_data) * negSlope;
+          *gradOutput_data = (*gradOutput_data) * negSlope;
         }
       );
       THTensor_(set)(gradInput, gradOutput);

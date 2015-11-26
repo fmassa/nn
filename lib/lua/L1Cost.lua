@@ -23,6 +23,7 @@ function L1Cost:updateGradInput(input)
       input:type(),
       THNN.NULL,
       input:cdata(),
+      THNN.NULL,
       self.gradInput:cdata()
    )
    return self.gradInput

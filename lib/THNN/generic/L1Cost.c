@@ -13,7 +13,7 @@ void THNN_(L1Cost_updateOutput)(THNNState *state, THTensor *input, real *output)
   *output = sum;
 }
 
-void THNN_(L1Cost_updateGradInput)(THNNState *state, THTensor *input, THTensor *gradInput)
+void THNN_(L1Cost_updateGradInput)(THNNState *state, THTensor *input, THTensor *gradOutput, THTensor *gradInput)
 {
   THTensor_(resizeAs)(gradInput, input);
   TH_TENSOR_APPLY2(real, gradInput, real, input,

@@ -45,7 +45,7 @@ TH_API void THNN_(AbsCriterion_updateGradInput)(
 TH_API void THNN_(ClassNLLCriterion_updateOutput)(
           THNNState *state,
           THTensor *input,
-          THLongTensor *target,
+          THIndexTensor *target,
           THTensor *output,
           bool sizeAverage,
           THTensor *weights,
@@ -53,7 +53,7 @@ TH_API void THNN_(ClassNLLCriterion_updateOutput)(
 TH_API void THNN_(ClassNLLCriterion_updateGradInput)(
           THNNState *state,
           THTensor *input,
-          THLongTensor *target,
+          THIndexTensor *target,
           THTensor *gradInput,
           bool sizeAverage,
           THTensor *weights,
@@ -105,6 +105,7 @@ TH_API void THNN_(L1Cost_updateOutput)(
 TH_API void THNN_(L1Cost_updateGradInput)(
           THNNState *state,
           THTensor *input,
+          THTensor *gradOutput,
           THTensor *gradInput);
 
 TH_API void THNN_(LogSigmoid_updateOutput)(
@@ -114,6 +115,7 @@ TH_API void THNN_(LogSigmoid_updateOutput)(
           THTensor *buffer);
 TH_API void THNN_(LogSigmoid_updateGradInput)(
           THNNState *state,
+          THTensor *input,
           THTensor *gradOutput,
           THTensor *gradInput,
           THTensor *buffer);
@@ -124,18 +126,19 @@ TH_API void THNN_(LogSoftMax_updateOutput)(
           THTensor *output);
 TH_API void THNN_(LogSoftMax_updateGradInput)(
           THNNState *state,
+          THTensor *input,
           THTensor *gradOutput,
           THTensor *gradInput,
           THTensor *output);
 
 TH_API void THNN_(LookupTable_accGradParameters)(
           THNNState *state,
-          THLongTensor *input,
+          THIndexTensor *input,
           THTensor *gradOutput,
           THTensor *gradWeight,
           real lr,
           bool shouldScaleGradByFreq, 
-          THIntTensor* count);
+          THIndexTensor* count);
 
 TH_API void THNN_(MarginCriterion_updateOutput)(
           THNNState *state,

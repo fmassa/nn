@@ -2,7 +2,7 @@
 #define TH_GENERIC_FILE "generic/LookupTable.c"
 #else
 
-static void nn_(LookupTable_resetCount)(int *count_data, THLongTensor *input)
+static void nn_(LookupTable_resetCount)(long *count_data, THLongTensor *input)
 {
   int i;
   long *input_data = THLongTensor_data(input);
@@ -20,15 +20,15 @@ static void nn_(LookupTable_resetCount)(int *count_data, THLongTensor *input)
   }
 }
 
-void THNN_(LookupTable_accGradParameters)(THNNState *state, THLongTensor *input, THTensor *gradOutput, THTensor *gradWeight, real lr, bool shouldScaleGradByFreq, THIntTensor* count)
+void THNN_(LookupTable_accGradParameters)(THNNState *state, THLongTensor *input, THTensor *gradOutput, THTensor *gradWeight, real lr, bool shouldScaleGradByFreq, THLongTensor* count)
 {
   long i;
-  int *count_data = NULL;
+  long *count_data = NULL;
   
   if (shouldScaleGradByFreq)
   {
-    THIntTensor_resize1d(count, gradWeight->size[0]);
-    count_data = THIntTensor_data(count);
+    THLongTensor_resize1d(count, gradWeight->size[0]);
+    count_data = THLongTensor_data(count);
   }
 
   if (!THTensor_(isContiguous)(gradWeight))

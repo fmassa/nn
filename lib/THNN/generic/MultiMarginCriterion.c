@@ -35,7 +35,7 @@ void THNN_(MultiMarginCriterion_updateOutput)(THNNState *state, THTensor *input,
   target_data = THTensor_(data)(target);
 
   sum = 0;
-  for(t = 0; t < nframe; t++)
+  for (t = 0; t < nframe; t++)
   {
     long target_idx = (long)(target_data[t]-1);
     real input_target = input_data[target_idx];

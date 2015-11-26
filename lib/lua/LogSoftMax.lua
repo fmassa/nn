@@ -16,6 +16,7 @@ function LogSoftMax:updateGradInput(input, gradOutput)
      'THNN_RealLogSoftMax_updateGradInput',
      input:type(),
      THNN.NULL,
+     input:cdata(),
      gradOutput:cdata(),
      self.gradInput:cdata(),
      self.output:cdata()

@@ -22,6 +22,7 @@ function LogSigmoid:updateGradInput(input, gradOutput)
      'THNN_RealLogSigmoid_updateGradInput',
      input:type(),
      THNN.NULL,
+     input:cdata(),
      gradOutput:cdata(),
      self.gradInput:cdata(),
      self.buffer:cdata()

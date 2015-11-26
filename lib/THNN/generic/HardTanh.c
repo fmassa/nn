@@ -9,13 +9,13 @@ void THNN_(HardTanh_updateOutput)(THNNState *state, THTensor *input, THTensor *o
   if (input->nDimension == 1 || !THTensor_(isContiguous)(input) || !THTensor_(isContiguous)(output))
   {
     TH_TENSOR_APPLY2(real, output, real, input,
-         if (*input_data < min_val)
-           *output_data = min_val;
-         else if (*input_data <= max_val)
-           *output_data = *input_data;
-         else
-           *output_data = max_val;
-     );
+      if (*input_data < min_val)
+        *output_data = min_val;
+      else if (*input_data <= max_val)
+        *output_data = *input_data;
+      else
+        *output_data = max_val;
+    );
   }
   else
   {
@@ -46,10 +46,10 @@ void THNN_(HardTanh_updateGradInput)(THNNState *state, THTensor *input, THTensor
       !THTensor_(isContiguous)(gradInput))
   {
     TH_TENSOR_APPLY3(real, gradInput, real, gradOutput, real, input,
-         if (*input_data < min_val || *input_data > max_val)
-           *gradInput_data = 0;
-         else
-           *gradInput_data = *gradOutput_data;
+      if (*input_data < min_val || *input_data > max_val)
+        *gradInput_data = 0;
+      else
+        *gradInput_data = *gradOutput_data;
     );
   }
   else
