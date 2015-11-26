@@ -148,6 +148,89 @@ TH_API void THNN_(MSECriterion_updateGradInput)(
           THTensor *gradInput,
           bool sizeAverage);
 
+TH_API void THNN_(MultiLabelMarginCriterion_updateOutput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *target,
+          real *output,
+          bool sizeAverage);
+TH_API void THNN_(MultiLabelMarginCriterion_updateGradInput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *target,
+          THTensor *gradInput,
+          bool sizeAverage);
+
+TH_API void THNN_(MultiMarginCriterion_updateOutput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *target,
+          real* output,
+          bool sizeAverage,
+          int p);
+TH_API void THNN_(MultiMarginCriterion_updateGradInput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *target,
+          THTensor *gradInput,
+          bool sizeAverage,
+          int p);
+
+TH_API void THNN_(PReLU_updateOutput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *output,
+          THTensor *weight,
+          long nOutputPlane);
+TH_API void THNN_(PReLU_updateGradInput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *gradOutput,
+          THTensor *gradInput,
+          THTensor *weight,
+          long nOutputPlane);
+TH_API void THNN_(PReLU_accGradParameters)(
+          THNNState* state,
+          THTensor* input,
+          THTensor* gradOutput,
+          THTensor* gradInput,
+          THTensor *weight,
+          THTensor *gradWeight,
+          long nOutputPlane,
+          real scale);
+
+TH_API void THNN_(RReLU_updateOutput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *output,
+          THTensor *noise,
+          real lower, 
+          real upper,
+          bool train,
+          bool inplace,
+          THGenerator *generator);
+TH_API void THNN_(RReLU_updateGradInput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *gradOutput,
+          THTensor *gradInput,
+          THTensor *noise,
+          real lower,
+          real upper,
+          bool train,
+          bool inplace);
+
+TH_API void THNN_(Sigmoid_updateOutput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *output);
+TH_API void THNN_(Sigmoid_updateGradInput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *gradOutput,
+          THTensor *gradInput,
+          THTensor *output);
+
 TH_API void THNN_(SpatialConvolution_updateOutput)(
           THNNState *state,
           THTensor* input,

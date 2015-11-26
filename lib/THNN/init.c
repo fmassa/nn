@@ -43,6 +43,21 @@
 #include "generic/MSECriterion.c"
 #include "THGenerateFloatTypes.h"
 
+#include "generic/MultiLabelMarginCriterion.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/MultiMarginCriterion.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/PReLU.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/RReLU.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/Sigmoid.c"
+#include "THGenerateFloatTypes.h"
+
 #include "generic/SpatialConvolutionMM.c"
 #include "THGenerateFloatTypes.h"
 
