@@ -66,5 +66,8 @@
 #include "generic/Sqrt.c"
 #include "THGenerateFloatTypes.h"
 
+#include "generic/Square.c"
+#include "THGenerateFloatTypes.h"
+
 #include "generic/Threshold.c"
 #include "THGenerateFloatTypes.h"

@@ -62,7 +62,7 @@ function nntest.Abs()
    local output_nn = nnmodule:forward(input)
    local err = (output-output_nn):abs():max()
 
-   mytester:assertlt(err, high_precision ,  'error comparing against nn ')
+   mytester:assertlt(err, high_precision ,  torch.typename(module) ..' - error comparing against nn ')
 end
 
 function nntest.ClassNLLCriterion()
@@ -87,7 +87,7 @@ function nntest.ClassNLLCriterion()
    local output_nn = nncri:forward(input,target)
    local err = math.abs(output-output_nn)
 
-   mytester:assertlt(err, high_precision ,  'error comparing against nn ')
+   mytester:assertlt(err, high_precision ,  torch.typename(cri) ..' - error comparing against nn ')
 
    local cri = THNN.ClassNLLCriterion(weights)
    local nncri = nn.ClassNLLCriterion(weights)
@@ -95,7 +95,7 @@ function nntest.ClassNLLCriterion()
    local output_nn = nncri:forward(input,target)
    local err = math.abs(output-output_nn)
 
-   mytester:assertlt(err, high_precision ,  'error comparing against nn ')
+   mytester:assertlt(err, high_precision ,  torch.typename(cri) ..' - error comparing against nn ')
 
 end
 
@@ -114,7 +114,7 @@ function nntest.DistKLDivCriterion()
    local output_nn = nncri:forward(input,target)
    local err = math.abs(output-output_nn)
 
-   mytester:assertlt(err, high_precision ,  'error comparing against nn ')
+   mytester:assertlt(err, high_precision ,  torch.typename(cri) ..' - error comparing against nn ')
 end
 
 function nntest.HardShrink()
@@ -139,7 +139,7 @@ function nntest.HardShrink()
    local output_nn = nnmodule:forward(input)
    local err = (output-output_nn):abs():max()
 
-   mytester:assertlt(err, high_precision ,  'error comparing against nn ')
+   mytester:assertlt(err, high_precision ,  torch.typename(module) ..' - error comparing against nn ')
 end
 
 function nntest.HardTanh()
@@ -163,7 +163,7 @@ function nntest.HardTanh()
    local output_nn = nnmodule:forward(input)
    local err = (output-output_nn):abs():max()
 
-   mytester:assertlt(err, high_precision ,  'error comparing against nn ')
+   mytester:assertlt(err, high_precision ,  torch.typename(module) ..' - error comparing against nn ')
 end
 
 function nntest.L1Cost()
@@ -178,7 +178,7 @@ function nntest.L1Cost()
    local output_nn = nnmodule:forward(input)
    local err = math.abs(output-output_nn)
 
-   mytester:assertlt(err, high_precision ,  'error comparing against nn ')
+   mytester:assertlt(err, high_precision ,  torch.typename(module) ..' - error comparing against nn ')
 end
 
 function nntest.LogSigmoid()
@@ -201,7 +201,7 @@ function nntest.LogSigmoid()
    local output_nn = nnmodule:forward(input)
    local err = (output-output_nn):abs():max()
 
-   mytester:assertlt(err, high_precision ,  'error comparing against nn ')
+   mytester:assertlt(err, high_precision ,  torch.typename(module) ..' - error comparing against nn ')
 end
 
 function nntest.LogSoftmax()
@@ -223,7 +223,7 @@ function nntest.LogSoftmax()
    local output_nn = nnmodule:forward(input)
    local err = (output-output_nn):abs():max()
 
-   mytester:assertlt(err, high_precision ,  'error comparing against nn ')
+   mytester:assertlt(err, high_precision ,  torch.typename(module) ..' - error comparing against nn ')
 end
 
 function nntest.LookupTable()
@@ -288,7 +288,7 @@ function nntest.LookupTable()
    local output_nn = nnmodule:forward(input)
    local err = (output-output_nn):abs():max()
 
-   mytester:assertlt(err, high_precision, 'error comparing against nn ')
+   mytester:assertlt(err, high_precision, torch.typename(module) ..' - error comparing against nn ')
 end
 
 function nntest.MarginCriterion()
@@ -303,7 +303,7 @@ function nntest.MarginCriterion()
    local output_nn = nncri:forward(input,target)
    local err = math.abs(output-output_nn)
 
-   mytester:assertlt(err, high_precision, 'error comparing against nn ')
+   mytester:assertlt(err, high_precision, torch.typename(cri) ..' - error comparing against nn ')
 end
 
 function nntest.MSECriterion()
@@ -318,7 +318,7 @@ function nntest.MSECriterion()
    local output_nn = nncri:forward(input,target)
    local err = math.abs(output-output_nn)
 
-   mytester:assertlt(err, high_precision, 'error comparing against nn ')
+   mytester:assertlt(err, high_precision, torch.typename(cri) ..' - error comparing against nn ')
 end
 
 function nntest.MultiLabelMarginCriterion()
@@ -657,7 +657,7 @@ function nntest.Sqrt()
    local ink = math.random(3,5)
    local input = torch.Tensor(ink, inj, ini):zero()
 
-   local module = nn.Sqrt()
+   local module = THNN.Sqrt()
 
    local err = nn.Jacobian.testJacobian(module, input, 0.1, 2)
    mytester:assertlt(err, precision, 'error on state ')
@@ -672,7 +672,38 @@ function nntest.Sqrt()
    local output_nn = nnmodule:forward(input)
    local err = (output-output_nn):abs():max()
 
-   mytester:assertlt(err, high_precision ,  'error comparing against nn ')
+   mytester:assertlt(err, high_precision ,  torch.typename(module) ..' - error comparing against nn ')
+end
+
+function nntest.Square()
+   local in1 = torch.rand(5,7)
+   local module = THNN.Square()
+   local out = module:forward(in1)
+   local err = out:dist(in1:cmul(in1))
+   mytester:assertlt(err, 1e-15, torch.typename(module) .. ' - forward err ')
+
+   local ini = math.random(3,5)
+   local inj = math.random(3,5)
+   local ink = math.random(3,5)
+   local input = torch.Tensor(ink, inj, ini):zero()
+
+   local module = THNN.Square()
+
+   local err = nn.Jacobian.testJacobian(module, input)
+   mytester:assertlt(err, precision, 'error on state ')
+
+   local ferr, berr = nn.Jacobian.testIO(module, input)
+   mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
+
+    -- compare against nn
+   local nnmodule = nn.Square()
+   local output = module:forward(input)
+   local output_nn = nnmodule:forward(input)
+   local err = (output-output_nn):abs():max()
+
+   mytester:assertlt(err, high_precision ,  torch.typename(module) ..' - error comparing against nn ')
+
 end
 
 
@@ -699,7 +730,7 @@ function nntest.Threshold()
    local output_nn = nnmodule:forward(input)
    local err = (output-output_nn):abs():max()
 
-   mytester:assertlt(err, high_precision ,  'error comparing against nn ')
+   mytester:assertlt(err, high_precision ,  torch.typename(module) ..' - error comparing against nn ')
 end
 
 

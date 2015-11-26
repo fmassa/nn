@@ -60,6 +60,7 @@ include 'Sigmoid.lua'
 include 'SpatialConvolutionMM.lua'
 include 'SpatialMaxPooling.lua'
 include 'Sqrt.lua'
+include 'Square.lua'
 include 'Threshold.lua'
 
 return THNN

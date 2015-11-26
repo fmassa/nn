@@ -298,6 +298,17 @@ TH_API void THNN_(Sqrt_updateGradInput)(
           THTensor *gradInput,
           THTensor *output);
 
+TH_API void THNN_(Square_updateOutput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *output);
+
+TH_API void THNN_(Square_updateGradInput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *gradOutput,
+          THTensor *gradInput);
+
 TH_API void THNN_(Threshold_updateOutput)(
           THNNState *state,
           THTensor* input,
