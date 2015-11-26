@@ -54,6 +54,7 @@ include 'MarginCriterion.lua'
 include 'MSECriterion.lua'
 include 'SpatialConvolutionMM.lua'
 include 'SpatialMaxPooling.lua'
+include 'Sqrt.lua'
 include 'Threshold.lua'
 
 return THNN

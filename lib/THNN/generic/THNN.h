@@ -196,6 +196,18 @@ TH_API void THNN_(SpatialMaxPooling_updateGradInput)(
           int dW, int dH,
           THTensor* indices);
 
+TH_API void THNN_(Sqrt_updateOutput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *output);
+
+TH_API void THNN_(Sqrt_updateGradInput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *gradOutput,
+          THTensor *gradInput,
+          THTensor *output);
+
 TH_API void THNN_(Threshold_updateOutput)(
           THNNState *state,
           THTensor* input,
