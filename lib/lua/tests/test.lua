@@ -638,6 +638,44 @@ function nntest.SpatialMaxPooling()
   end
 end
 
+function nntest.Sqrt()
+   local in1 = torch.rand(5,7)
+   local module = THNN.Sqrt()
+   local out = module:forward(in1)
+   local err = out:dist(in1:sqrt())
+   mytester:assertlt(err, 1e-15, torch.typename(module) .. ' - forward err ')
+
+   -- Test zero inputs; we will avoid a div-by-zero by setting to zero
+   local zin = torch.DoubleTensor(5, 7):zero()
+   module:forward(zin)
+   local zgradout = torch.rand(5, 7)
+   local zgradin = module:backward(zin, zgradout)
+   mytester:assertTensorEq(zgradin, torch.DoubleTensor(5, 7):zero(), 0.000001, "error in sqrt backward singularity")
+
+   local ini = math.random(3,5)
+   local inj = math.random(3,5)
+   local ink = math.random(3,5)
+   local input = torch.Tensor(ink, inj, ini):zero()
+
+   local module = nn.Sqrt()
+
+   local err = nn.Jacobian.testJacobian(module, input, 0.1, 2)
+   mytester:assertlt(err, precision, 'error on state ')
+
+   local ferr, berr = nn.Jacobian.testIO(module, input, 0, 2)
+   mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
+
+    -- compare against nn
+   local nnmodule = nn.Sqrt()
+   local output = module:forward(input)
+   local output_nn = nnmodule:forward(input)
+   local err = (output-output_nn):abs():max()
+
+   mytester:assertlt(err, high_precision ,  'error comparing against nn ')
+end
+
+
 function nntest.Threshold()
    local ini = math.random(3,5)
    local inj = math.random(3,5)
