@@ -55,6 +55,9 @@
 #include "generic/Sigmoid.c"
 #include "THGenerateFloatTypes.h"
 
+#include "generic/SoftMax.c"
+#include "THGenerateFloatTypes.h"
+
 #include "generic/SpatialConvolutionMM.c"
 #include "THGenerateFloatTypes.h"
 

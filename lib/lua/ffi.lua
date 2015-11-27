@@ -250,7 +250,17 @@ TH_API void THNN_(Sigmoid_updateGradInput)(
           THTensor *gradOutput,
           THTensor *gradInput,
           THTensor *output);
-          
+
+TH_API void THNN_(SoftMax_updateOutput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *output);
+TH_API void THNN_(SoftMax_updateGradInput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *gradOutput,
+          THTensor *gradInput,
+          THTensor *output);         
 TH_API void THNN_(SpatialConvolution_updateOutput)(
           THNNState *state,
           THTensor* input,
@@ -340,6 +350,8 @@ TH_API void THNN_(Threshold_updateGradInput)(
 local temp_str = {}
 
 base_str = string.gsub(base_str, "TH_API void THNN_%(([%a%d_]+)%)", 'void THNN_TYPE%1') -- conversion used for generic/THNN.h
+
+base_str = string.gsub(base_str, 'THIndexTensor','THLongTensor')
 
 temp_str[1] = string.gsub(base_str,'TYPE','Double')
 temp_str[1] = string.gsub(temp_str[1],'real','double')
