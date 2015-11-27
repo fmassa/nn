@@ -261,6 +261,17 @@ TH_API void THNN_(SmoothL1Criterion_updateGradInput)(
           THTensor *gradInput,
           bool sizeAverage);
 
+TH_API void THNN_(SoftMax_updateOutput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *output);
+TH_API void THNN_(SoftMax_updateGradInput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *gradOutput,
+          THTensor *gradInput,
+          THTensor *output);         
+
 TH_API void THNN_(SpatialConvolution_updateOutput)(
           THNNState *state,
           THTensor* input,

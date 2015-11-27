@@ -7,6 +7,7 @@ local mytester = torch.Tester()
 local jac
 
 local precision = 1e-5
+local expprecision = 1e-4
 local high_precision = 1e-12
 
 local nntest = {}
@@ -516,7 +517,29 @@ function nntest.LogSigmoid()
    local output_nn = nnmodule:forward(input)
    local err = (output-output_nn):abs():max()
 
-   mytester:assertlt(err, high_precision, 'error comparing against nn ')
+   mytester:assertlt(err, high_precision, torch.typename(module) ..' - error comparing against nn ')
+end
+
+function nntest.Softmax()
+   local ini = math.random(3,5)
+   local ink = math.random(3,5)
+   local input = torch.Tensor(ink, ini):zero()
+   local module = THNN.SoftMax()
+
+   local err = jac.testJacobian(module,input)
+   mytester:assertlt(err,expprecision, 'error on state ')
+
+   local ferr,berr = jac.testIO(module,input)
+   mytester:asserteq(ferr, 0, torch.typename(module) .. ' - i/o forward err ')
+   mytester:asserteq(berr, 0, torch.typename(module) .. ' - i/o backward err ')
+
+   -- compare against nn
+   local nnmodule = nn.SoftMax()
+   local output = module:forward(input)
+   local output_nn = nnmodule:forward(input)
+   local err = (output-output_nn):abs():max()
+
+   mytester:assertlt(err, high_precision, torch.typename(module) ..' - error comparing against nn ')
 end
 
 function nntest.SpatialConvolutionMM()
