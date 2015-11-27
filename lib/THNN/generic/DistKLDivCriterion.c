@@ -8,7 +8,7 @@ void THNN_(DistKLDivCriterion_updateOutput)(THNNState *state, THTensor *input, T
 
   TH_TENSOR_APPLY2(real, input, real, target,
     sum += *target_data > 0 ? *target_data * (log(*target_data) - *input_data) : 0;
-  )
+  );
 
   if (sizeAverage)
     sum /= THTensor_(nElement)(input);
@@ -23,7 +23,7 @@ void THNN_(DistKLDivCriterion_updateGradInput)(THNNState *state, THTensor *input
   THTensor_(resizeAs)(gradInput, input);
   TH_TENSOR_APPLY3(real, gradInput, real, input, real, target,
     *gradInput_data = *target_data > 0 ? norm * (-*target_data) : 0;
-  )
+  );
 }
 
 #endif

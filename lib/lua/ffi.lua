@@ -5,18 +5,15 @@ typedef void THNNState;
 
 // from torch7/lib/TH/THRandom.h
 typedef struct {
-  /* The initial seed. */
   unsigned long the_initial_seed;
-  int left;  /* = 1; */
-  int seeded; /* = 0; */
+  int left;
+  int seeded;
   unsigned long next;
   unsigned long state[624]; /* the array for the state vector 624 = _MERSENNE_STATE_N  */
-  /********************************/
-  /* For normal distribution */
   double normal_x;
   double normal_y;
   double normal_rho;
-  int normal_is_valid; /* = 0; */
+  int normal_is_valid;
 } THGenerator;
 
 TH_API void THNN_(Abs_updateOutput)(
@@ -250,7 +247,20 @@ TH_API void THNN_(Sigmoid_updateGradInput)(
           THTensor *gradOutput,
           THTensor *gradInput,
           THTensor *output);
-          
+
+TH_API void THNN_(SmoothL1Criterion_updateOutput)(
+          THNNState *state, 
+          THTensor *input,
+          THTensor *target,
+          real* output,
+          bool sizeAverage);
+TH_API void THNN_(SmoothL1Criterion_updateGradInput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *target,
+          THTensor *gradInput,
+          bool sizeAverage);
+
 TH_API void THNN_(SpatialConvolution_updateOutput)(
           THNNState *state,
           THTensor* input,
@@ -335,11 +345,109 @@ TH_API void THNN_(Threshold_updateGradInput)(
           THTensor* gradInput,
           real threshold,
           int inPlace);
+
+TH_API void THNN_(VolumetricConvolution_updateOutput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *output,
+          THTensor *weight,
+          THTensor *bias, 
+          int dT, int dW, int dH);
+
+TH_API void THNN_(VolumetricConvolution_updateGradInput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *gradOutput,
+          THTensor *gradInput,
+          THTensor *weight, 
+          THTensor *bias,
+          int dT, int dW, int dH, 
+          int nOutputPlane);
+
+TH_API void THNN_(VolumetricConvolution_accGradParameters)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *gradOutput,
+          THTensor *gradWeight,
+          THTensor *gradBias,
+          int dT, int dW, int dH,
+          int nOutputPlane,
+          real scale);
+
+TH_API void THNN_(VolumetricAveragePooling_updateOutput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *output,
+          int kT, int kW, int kH,
+          int dT, int dW, int dH);
+
+TH_API void THNN_(VolumetricAveragePooling_updateGradInput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *gradOutput,
+          THTensor *gradInput, 
+          int kT, int kW, int kH,
+          int dT, int dW, int dH);
+
+TH_API void THNN_(VolumetricDeconvolution_updateOutput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *output,
+          THTensor *weight,
+          THTensor *bias,
+          int kT, int kH, int kW,
+          int dT, int dH, int dW,
+          int pT, int pH, int pW,
+          int nInputPlane,
+          int nOutputPlane);
+
+TH_API void THNN_(VolumetricDeconvolution_updateGradInput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *gradOutput,
+          THTensor *gradInput,
+          THTensor *weight,
+          THTensor *bias,
+          int kT, int kH, int kW,
+          int dT, int dH, int dW,
+          int pT, int pH, int pW,
+          int nInputPlane,
+          int nOutputPlane);
+
+TH_API void THNN_(VolumetricDeconvolution_accGradParameters)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *gradOutput,
+          THTensor *gradWeight,
+          THTensor *gradBias,
+          int kT, int kH, int kW, 
+          int dT, int dH, int dW, 
+          int pT, int pH, int pW, 
+          int nInputPlane,
+          int nOutputPlane);
+
+TH_API void THNN_(VolumetricMaxPooling_updateOutput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *output, 
+          int kT, int kW, int kH, 
+          int dT, int dW, int dH,
+          THTensor *indices);
+
+TH_API void THNN_(VolumetricMaxPooling_updateGradInput)(
+          THNNState *state,
+          THTensor *input,
+          THTensor *gradOutput,
+          THTensor *gradInput, 
+          int dT, int dW, int dH,
+          THTensor *indices);
 ]]
 
 local temp_str = {}
 
 base_str = string.gsub(base_str, "TH_API void THNN_%(([%a%d_]+)%)", 'void THNN_TYPE%1') -- conversion used for generic/THNN.h
+
+base_str = string.gsub(base_str, 'THIndexTensor','THLongTensor')
 
 temp_str[1] = string.gsub(base_str,'TYPE','Double')
 temp_str[1] = string.gsub(temp_str[1],'real','double')

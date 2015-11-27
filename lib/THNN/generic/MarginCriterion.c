@@ -9,7 +9,7 @@ void THNN_(MarginCriterion_updateOutput)(THNNState *state, THTensor *input, THTe
   TH_TENSOR_APPLY2(real, input, real, target,
     real z = (margin - *input_data * *target_data);
     sum += z>0 ? z : 0;
-  )
+  );
 
   if (sizeAverage)
     sum /= THTensor_(nElement)(input);
@@ -24,7 +24,7 @@ void THNN_(MarginCriterion_updateGradInput)(THNNState *state, THTensor *input, T
   THTensor_(resizeAs)(gradInput, input);
   TH_TENSOR_APPLY3(real, gradInput, real, input, real, target,
     *gradInput_data = (*input_data * *target_data) < margin ? -norm * *target_data : 0;
-  )
+  );
 }
 
 #endif

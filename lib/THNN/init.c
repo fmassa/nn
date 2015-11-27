@@ -55,6 +55,9 @@
 #include "generic/Sigmoid.c"
 #include "THGenerateFloatTypes.h"
 
+#include "generic/SmoothL1Criterion.c"
+#include "THGenerateFloatTypes.h"
+
 #include "generic/SpatialConvolutionMM.c"
 #include "THGenerateFloatTypes.h"
 
@@ -68,4 +71,16 @@
 #include "THGenerateFloatTypes.h"
 
 #include "generic/Threshold.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/VolumetricAveragePooling.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/VolumetricConvolution.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/VolumetricDeconvolution.c"
+#include "THGenerateFloatTypes.h"
+
+#include "generic/VolumetricMaxPooling.c"
 #include "THGenerateFloatTypes.h"
