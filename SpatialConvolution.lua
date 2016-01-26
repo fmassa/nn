@@ -95,7 +95,7 @@ end
 
 function SpatialConvolution:updateOutput(input)
    backCompatibility(self)
-   viewWeight(self)
+   --viewWeight(self)
    input = makeContiguous(self, input)
    input.THNN.SpatialConvolutionMM_updateOutput(
       input:cdata(),
@@ -107,9 +107,32 @@ function SpatialConvolution:updateOutput(input)
       self.dW, self.dH,
       self.padW, self.padH
    )
-   unviewWeight(self)
+   --unviewWeight(self)
    return self.output
 end
+
+function SpatialConvolution:updateOutput2(input)
+   backCompatibility(self)
+   --viewWeight(self)
+   input = makeContiguous(self, input)
+   input.THNN.SpatialConvolution_forwardFilter(
+      input:cdata(),
+      self.output:cdata(),
+      self.weight:cdata(),
+      self.finput:cdata(),
+      self.dW, self.dH,
+      self.padW, self.padH
+   )
+
+   input.THNN.SpatialConvolution_addBiasForward(
+      self.output:cdata(),
+      self.bias:cdata(),
+      self.fgradInput:cdata()
+   )
+   --unviewWeight(self)
+   return self.output
+end
+
 
 function SpatialConvolution:updateGradInput(input, gradOutput)
    if self.gradInput then

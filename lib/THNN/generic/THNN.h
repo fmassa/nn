@@ -232,4 +232,10 @@ TH_API void THNN_(SpatialMaxPooling_updateGradInput)(
           THTensor *gradInput,
           int dW, int dH,
           THTensor *indices);
+
+TH_API void THNN_(SpatialConvolution_forwardFilter)(THNNState *state, THTensor *input, THTensor *output, THTensor *weight, THTensor* columns, int dW, int dH, int padW, int padH);
+TH_API void THNN_(SpatialConvolution_addBiasForward)(THNNState *state, THTensor *output, THTensor *bias, THTensor *ones);
+TH_API void THNN_(SpatialConvolution_backwardData)(THNNState *state, THTensor *input, THTensor *gradInput, THTensor *gradOutput, THTensor *weight, THTensor *fgradInput, int dW, int dH, int padW, int padH);
+TH_API void THNN_(SpatialConvolution_backwardFilter)(THNNState *state, THTensor *input, THTensor *gradOutput, THTensor *gradWeight, THTensor *columns, int dW, int dH, int padW, int padH, real scale);
+TH_API void THNN_(SpatialConvolution_backwardBias)(THNNState *state, THTensor *input, THTensor *gradOutput, THTensor *gradBias, THTensor *ones, real scale);
 #endif

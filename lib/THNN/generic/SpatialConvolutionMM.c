@@ -6,8 +6,6 @@
 # include <windows.h>
 #endif
 
-
-
 /* note: due to write issues, this one cannot be parallelized as well as unfolded_copy */
 static void THNN_(unfolded_acc)(THTensor *finput, THTensor *input,
                                int kW, int kH,
@@ -153,16 +151,154 @@ static void THNN_(SpatialConvolutionMM_updateOutput_frame)(THTensor *input, THTe
 
   THNN_(unfolded_copy)(finput, input, kW, kH, dW, dH, padW, padH, nInputPlane, inputWidth, inputHeight, outputWidth, outputHeight);
 
-  output2d = THTensor_(newWithStorage2d)(output->storage, output->storageOffset,
-                                         nOutputPlane, -1,
-                                         outputHeight*outputWidth, -1);
-
   for(i = 0; i < nOutputPlane; i++)
-    THVector_(fill)(output->storage->data+output->storageOffset+output->stride[0]*i, THTensor_(get1d)(bias, i), outputHeight*outputWidth);
+    THVector_(fill)(THTensor_(data)(output)+output->stride[0]*i, THTensor_(get1d)(bias, i), outputHeight*outputWidth);
 
-  THTensor_(addmm)(output2d, 1, output2d, 1, weight, finput);
+  // M,N,K are dims of matrix A and B
+  // (see http://docs.nvidia.com/cuda/cublas/#cublas-lt-t-gt-gemm)
+  long m = nOutputPlane;
+  long n = finput->size[1];
+  long k = nInputPlane*kH*kW;
 
-  THTensor_(free)(output2d);
+  // Do GEMM (note: this is a bit confusing because gemm assumes column-major matrices)
+  THBlas_(gemm)(
+      'n', 'n',
+      n, m, k,
+      1,
+      THTensor_(data)(finput), n,
+      THTensor_(data)(weight), k,
+      1,//0,//1,
+      THTensor_(data)(output), n
+  );
+
+  /*
+  real *output_data = THTensor_(data)(output);
+  for(i = 0; i < nOutputPlane; i++)
+  {
+    real *output_data0 = output_data + output->stride[0]*i;
+    real bias0 = THTensor_(get1d)(bias,i);
+    for(long j = 0; j < outputHeight*outputWidth; j++) {
+        *(output_data0++) += bias0;
+    }
+ 
+  }
+  */
+}
+
+void THNN_(SpatialConvolution_forwardFilter)(THNNState *state, THTensor *input, THTensor *output, THTensor *weight, THTensor* columns, int dW, int dH, int padW, int padH)
+{
+  THArgCheck(input->nDimension == 3 || input->nDimension == 4, 1, "3D or 4D (batch mode) tensor expected");
+  THArgCheck(weight->nDimension == 4, 4, "weight tensor must be 4D (nOutputPlane,nInputPlane,kH,kW)");
+
+  long nInputPlane = weight->size[1];
+  long nOutputPlane = weight->size[0];
+  int kH = weight->size[2];
+  int kW = weight->size[3];
+
+  int batch = 1;
+  if (input->nDimension == 3) {
+    // Force batch
+    batch = 0;
+    THTensor_(resize4d)(input, 1, input->size[0], input->size[1], input->size[2]);
+  }
+  THArgCheck(input->size[1] == nInputPlane, 2, "input channels and nInputPlane dont match");
+
+  long inputWidth;
+  long inputHeight;
+  long outputWidth;
+  long outputHeight;
+
+  inputWidth   = input->size[3];
+  inputHeight  = input->size[2];
+  outputWidth  = (inputWidth + 2*padW - kW) / dW + 1;
+  outputHeight = (inputHeight + 2*padH - kH) / dH + 1;
+
+  if (outputWidth < 1 || outputHeight < 1)
+    THError("Given input size: (%dx%dx%d). Calculated output size: (%dx%dx%d). Output size is too small",
+        nInputPlane,inputHeight,inputWidth,nOutputPlane,outputHeight,outputWidth);
+
+  long batchSize = input->size[0];
+  long t;
+
+  THTensor_(resize3d)(columns, batchSize, kW*kH*nInputPlane, outputHeight*outputWidth);
+  THTensor_(resize4d)(output, batchSize, nOutputPlane, outputHeight, outputWidth);
+
+#pragma omp parallel for private(t) if(batchSize > 1)
+  for(t = 0; t < batchSize; t++)
+  {
+    THTensor *input_t = THTensor_(newSelect)(input, 0, t);
+    THTensor *output_t = THTensor_(newSelect)(output, 0, t);
+    THTensor *columns_t = THTensor_(newSelect)(columns, 0, t);
+
+    THNN_(unfolded_copy)(columns_t, input_t, kW, kH, dW, dH, padW, padH, nInputPlane, inputWidth, inputHeight, outputWidth, outputHeight);
+
+    // M,N,K are dims of matrix A and B
+    // (see http://docs.nvidia.com/cuda/cublas/#cublas-lt-t-gt-gemm)
+    long m = nOutputPlane;
+    long n = outputHeight*outputWidth;//columns_t->size[1];
+    long k = nInputPlane*kH*kW;
+
+    // Do GEMM (note: this is a bit confusing because gemm assumes column-major matrices)
+    THBlas_(gemm)(
+        'n', 'n',
+        n, m, k,
+        1,
+        THTensor_(data)(columns_t), n,
+        THTensor_(data)(weight), k,
+        0,
+        THTensor_(data)(output_t), n
+    );
+
+    THTensor_(free)(input_t);
+    THTensor_(free)(output_t);
+    THTensor_(free)(columns_t);
+  }
+
+  // Resize output
+  if (batch == 0) {
+    THTensor_(resize3d)(output, nOutputPlane, outputHeight, outputWidth);
+    THTensor_(resize3d)(input, nInputPlane, inputHeight, inputWidth);
+  }
+
+}
+
+
+void THNN_(SpatialConvolution_addBiasForward)(THNNState *state, THTensor *output, THTensor *bias, THTensor *ones)
+{
+  int nOutputPlane = bias->size[0];
+  int batch = 1;
+  if (output->nDimension == 3) {
+    // Force batch
+    batch = 0;
+    THTensor_(resize4d)(output, 1, output->size[0], output->size[1], output->size[2]);
+  }
+  THArgCheck(output->size[1] == nOutputPlane, 2, "input channels and nInputPlane dont match");
+
+  int batchSize = output->size[0];
+  long outputHeight = output->size[2];
+  long outputWidth = output->size[3];
+  long t, i, j;
+//#pragma omp parallel for private(t) if(batchSize > 1)
+  for(t = 0; t < batchSize; t++)
+  {
+    THTensor *output_t = THTensor_(newSelect)(output, 0, t);
+    real *output_data = THTensor_(data)(output_t);
+    for(i = 0; i < nOutputPlane; i++)
+    {
+      real *output_data0 = output_data + output->stride[1]*i;
+      real bias0 = THTensor_(get1d)(bias,i);
+      for(j = 0; j < outputHeight*outputWidth; j++) {
+        *(output_data0++) += bias0;
+      }
+    }
+    THTensor_(free)(output_t);
+  }
+
+  // Resize output
+  if (batch == 0) {
+    THTensor_(resize3d)(output, nOutputPlane, outputHeight, outputWidth);
+  }
+
 }
 
 void THNN_(SpatialConvolutionMM_updateOutput)(THNNState *state, THTensor *input, THTensor *output, THTensor *weight, THTensor *bias, THTensor* finput, int kW, int kH, int dW, int dH, int padW, int padH)
@@ -197,8 +333,8 @@ void THNN_(SpatialConvolutionMM_updateOutput)(THNNState *state, THTensor *input,
     THError("Given input size: (%dx%dx%d). Calculated output size: (%dx%dx%d). Output size is too small",
         nInputPlane,inputHeight,inputWidth,nOutputPlane,outputHeight,outputWidth);
 
-  if (nInputPlane*kW*kH != weight->size[1])
-    THError("Wrong number of input channels! Input has %d channels, expected %d",nInputPlane,weight->size[1]/(kW*kH));
+  //if (nInputPlane*kW*kH != weight->size[1])
+    //THError("Wrong number of input channels! Input has %d channels, expected %d",nInputPlane,weight->size[1]/(kW*kH));
 
   if(input->nDimension == 3)
   {
@@ -236,6 +372,80 @@ void THNN_(SpatialConvolutionMM_updateOutput)(THNNState *state, THTensor *input,
     }
   }
 }
+
+void THNN_(SpatialConvolution_backwardData)(THNNState *state, THTensor *input, THTensor *gradInput, THTensor *gradOutput, THTensor *weight, THTensor *gradColumns, int dW, int dH, int padW, int padH)
+{
+
+  long nInputPlane = weight->size[1];
+  long nOutputPlane = weight->size[0];
+  int kH = weight->size[2];
+  int kW = weight->size[3];
+
+  int batch = 1;
+  if (input->nDimension == 3) {
+    // Force batch
+    batch = 0;
+    THTensor_(resize4d)(input, 1, input->size[0], input->size[1], input->size[2]);
+    THTensor_(resize4d)(gradOutput, 1, gradOutput->size[0], gradOutput->size[1], gradOutput->size[2]);
+  }
+
+  THArgCheck(nOutputPlane == gradOutput->size[1], 1, "Number of gradOutput features is not equal to nOutputPlane" );
+
+  THTensor_(resizeAs)(gradInput, input);
+  //THTensor_(resizeAs)(gradColumns, columns);
+
+  THTensor_(zero)(gradInput);
+
+
+  long inputWidth   = input->size[3];
+  long inputHeight  = input->size[2];
+  long outputWidth  = gradOutput->size[3];
+  long outputHeight = gradOutput->size[2];
+
+  long batchSize = input->size[0];
+  long t;
+
+#pragma omp parallel for private(t) if(batchSize > 1)
+  for(t = 0; t < batchSize; t++)
+  {
+    THTensor *gradInput_t = THTensor_(newSelect)(gradInput, 0, t);
+    THTensor *gradOutput_t = THTensor_(newSelect)(gradOutput, 0, t);
+    THTensor *gradColumns_t = THTensor_(newSelect)(gradColumns, 0, t);
+
+
+    // M,N,K are dims of matrix A and B
+    // (see http://docs.nvidia.com/cuda/cublas/#cublas-lt-t-gt-gemm)
+    long m = nInputPlane*kW*kH;
+    long n = gradColumns->size[1];
+    long k = nOutputPlane;
+
+    // Do GEMM (note: this is a bit confusing because gemm assumes column-major matrices)
+    THBlas_(gemm)(
+        'n', 't',
+        n, m, k,
+        1,
+        THTensor_(data)(gradOutput_t), n,
+        THTensor_(data)(weight), m,
+        0,
+        THTensor_(data)(gradColumns), n
+    );
+
+
+    THNN_(unfolded_acc)(gradColumns, gradInput_t, kW, kH, dW, dH, padW, padH, nInputPlane, inputWidth, inputHeight, outputWidth, outputHeight);
+
+    THTensor_(free)(gradInput_t);
+    THTensor_(free)(gradOutput_t);
+    THTensor_(free)(gradColumns_t);
+  }
+
+  // Resize output
+  if (batch == 0) {
+    THTensor_(resize3d)(gradOutput, nOutputPlane, outputHeight, outputWidth);
+    THTensor_(resize3d)(input, nInputPlane, inputHeight, inputWidth);
+    THTensor_(resize3d)(gradInput, nInputPlane, inputHeight, inputWidth);
+  }
+}
+
 
 
 static void THNN_(SpatialConvolutionMM_updateGradInput_frame)(THTensor *gradInput, THTensor *gradOutput, THTensor *weight, THTensor *fgradInput,
@@ -312,6 +522,105 @@ static void THNN_(SpatialConvolutionMM_accGradParameters_frame)(THTensor *gradOu
   }
 
   THTensor_(free)(gradOutput2d);
+}
+
+void THNN_(SpatialConvolution_backwardFilter)(THNNState *state, THTensor *input, THTensor *gradOutput, THTensor *gradWeight, THTensor *columns, int dW, int dH, int padW, int padH, real scale)
+{
+  long nInputPlane = gradWeight->size[1];
+  long nOutputPlane = gradWeight->size[0];
+  int kH = gradWeight->size[2];
+  int kW = gradWeight->size[3];
+
+  int batch = 1;
+  if (input->nDimension == 3) {
+    // Force batch
+    batch = 0;
+    THTensor_(resize4d)(input, 1, input->size[0], input->size[1], input->size[2]);
+    THTensor_(resize4d)(gradOutput, 1, gradOutput->size[0], gradOutput->size[1], gradOutput->size[2]);
+  }
+
+  THArgCheck( nOutputPlane == gradOutput->size[input->nDimension == 4 ? 1 : 0], 1, "Number of output features is not equal to nOutputPlane" );
+
+  long inputHeight = input->size[2];
+  long inputWidth = input->size[3];
+  long outputHeight = gradOutput->size[2];
+  long outputWidth = gradOutput->size[3];
+  long batchSize = input->size[0];
+  long t;
+
+  for(t = 0; t < batchSize; t++)
+  {
+    THTensor *input_t = THTensor_(newSelect)(input, 0, t);
+    THTensor *gradOutput_t = THTensor_(newSelect)(gradOutput, 0, t);
+    THTensor *columns_t = THTensor_(newSelect)(columns, 0, t);
+
+    THNN_(unfolded_copy)(columns_t, input_t, kW, kH, dW, dH, padW, padH, nInputPlane, inputWidth, inputHeight, outputWidth, outputHeight);
+    // M,N,K are dims of matrix A and B
+    // (see http://docs.nvidia.com/cuda/cublas/#cublas-lt-t-gt-gemm)
+    long m = nOutputPlane;
+    long n = nInputPlane*kW*kH;
+    long k = columns->size[1];
+
+    // Do GEMM (note: this is a bit confusing because gemm assumes column-major matrices)
+    THBlas_(gemm)(
+        't', 'n',
+        n, m, k,
+        scale,
+        THTensor_(data)(columns), k,
+        THTensor_(data)(gradOutput_t), k,
+        1,
+        THTensor_(data)(gradWeight), n
+    );
+
+    THTensor_(free)(input_t);
+    THTensor_(free)(gradOutput_t);
+    THTensor_(free)(columns_t);
+  }
+}
+
+void THNN_(SpatialConvolution_backwardBias)(THNNState *state, THTensor *input, THTensor *gradOutput, THTensor *gradBias, THTensor *ones, real scale)
+{
+  long nOutputPlane = gradBias->size[0];
+
+  int batch = 1;
+  if (input->nDimension == 3) {
+    // Force batch
+    batch = 0;
+    THTensor_(resize4d)(input, 1, input->size[0], input->size[1], input->size[2]);
+    THTensor_(resize4d)(gradOutput, 1, gradOutput->size[0], gradOutput->size[1], gradOutput->size[2]);
+  }
+
+  THArgCheck( nOutputPlane == gradOutput->size[input->nDimension == 4 ? 1 : 0], 1, "Number of output features is not equal to nOutputPlane" );
+
+  long outputHeight = gradOutput->size[2];
+  long outputWidth = gradOutput->size[3];
+
+  long batchSize = input->size[0];
+  long t;
+
+  for(t = 0; t < batchSize; t++)
+  {
+    THTensor *gradOutput_t = THTensor_(newSelect)(gradOutput, 0, t);
+
+    // Do Bias:
+    // M,N,K are dims of matrix A and B
+    // (see http://docs.nvidia.com/cuda/cublas/#cublas-lt-t-gt-gemm)
+    long m_ = nOutputPlane;
+    long k_ = outputHeight * outputWidth;
+
+    // Do GEMV (note: this is a bit confusing because gemv assumes column-major matrices)
+    THBlas_(gemv)(
+        't',
+        k_, m_,
+        scale,
+        THTensor_(data)(gradOutput_t), k_,
+        THTensor_(data)(ones), 1,
+        1,
+        THTensor_(data)(gradBias), 1
+    );
+
+    THTensor_(free)(gradOutput_t);
+  }
 }
 
 void THNN_(SpatialConvolutionMM_accGradParameters)(THNNState *state, THTensor *input, THTensor *gradOutput, THTensor *gradWeight, THTensor *gradBias, THTensor *finput, real scale)
