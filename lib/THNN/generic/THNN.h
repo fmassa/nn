@@ -159,6 +159,7 @@ TH_API void THNN_(SpatialConvolutionMM_updateOutput)(
           THTensor *weight,
           THTensor *bias,
           THTensor* finput,
+          THTensor *fgradInput,
           int kW, int kH,
           int dW, int dH,
           int padW, int padH);
@@ -181,14 +182,18 @@ TH_API void THNN_(SpatialConvolutionMM_accGradParameters)(
           THTensor *gradWeight,
           THTensor *gradBias,
           THTensor *finput,
+          THTensor *fgradInput,
+          int kW, int kH,
+          int dW, int dH,
+          int padW, int padH,
           real scale);
 
 TH_API void THNN_(SpatialAdaptiveMaxPooling_updateOutput)(
           THNNState *state,
           THTensor *input,
           THTensor *output,
-          int owidth, int oheight,
-          THTensor *indices);
+          THTensor *indices,
+          int owidth, int oheight);
 TH_API void THNN_(SpatialAdaptiveMaxPooling_updateGradInput)(
           THNNState *state,
           THTensor *input,
@@ -220,16 +225,19 @@ TH_API void THNN_(SpatialMaxPooling_updateOutput)(
           THNNState *state,
           THTensor *input,
           THTensor *output,
+          THTensor *indices,
           int kW, int kH,
           int dW, int dH,
           int padW, int padH,
-          int ceil_mode,
-          THTensor *indices);
+          int ceil_mode);
 TH_API void THNN_(SpatialMaxPooling_updateGradInput)(
           THNNState *state,
           THTensor *input,
           THTensor *gradOutput,
           THTensor *gradInput,
+          THTensor *indices,
+          int kW, int kH,
           int dW, int dH,
-          THTensor *indices);
+          int padW, int padH,
+          int ceil_mode);
 #endif

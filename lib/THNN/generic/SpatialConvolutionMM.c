@@ -165,7 +165,7 @@ static void THNN_(SpatialConvolutionMM_updateOutput_frame)(THTensor *input, THTe
   THTensor_(free)(output2d);
 }
 
-void THNN_(SpatialConvolutionMM_updateOutput)(THNNState *state, THTensor *input, THTensor *output, THTensor *weight, THTensor *bias, THTensor* finput, int kW, int kH, int dW, int dH, int padW, int padH)
+void THNN_(SpatialConvolutionMM_updateOutput)(THNNState *state, THTensor *input, THTensor *output, THTensor *weight, THTensor *bias, THTensor *finput, THTensor* fgradInput, int kW, int kH, int dW, int dH, int padW, int padH)
 {
   int dimf = 0;
   int dimw = 2;
@@ -314,7 +314,7 @@ static void THNN_(SpatialConvolutionMM_accGradParameters_frame)(THTensor *gradOu
   THTensor_(free)(gradOutput2d);
 }
 
-void THNN_(SpatialConvolutionMM_accGradParameters)(THNNState *state, THTensor *input, THTensor *gradOutput, THTensor *gradWeight, THTensor *gradBias, THTensor *finput, real scale)
+void THNN_(SpatialConvolutionMM_accGradParameters)(THNNState *state, THTensor *input, THTensor *gradOutput, THTensor *gradWeight, THTensor *gradBias, THTensor *finput, THTensor *fgradInput, int kW, int kH, int dW, int dH, int padW, int padH, real scale)
 {
   long nOutputPlane = gradWeight->size[0];
   THArgCheck( nOutputPlane == gradOutput->size[input->nDimension == 4 ? 1 : 0], 1, "Number of output features is not equal to nOutputPlane" );
