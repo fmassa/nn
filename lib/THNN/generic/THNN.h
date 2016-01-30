@@ -2,6 +2,22 @@
 #define TH_GENERIC_FILE "generic/THNN.h"
 #else
 
+TH_API void THNN_(unfolded_acc)(
+          THTensor *finput, THTensor *input,
+          int kW, int kH,
+          int dW, int dH,
+          int padW, int padH,
+          int nInputPlane,
+          int inputWidth, int inputHeight,
+          int outputWidth, int outputHeight);
+TH_API void THNN_(unfolded_copy)(THTensor *finput, THTensor *input,
+          int kW, int kH,
+          int dW, int dH,
+          int padW, int padH,
+          int nInputPlane,
+          int inputWidth, int inputHeight,
+          int outputWidth, int outputHeight);
+
 TH_API void THNN_(Abs_updateOutput)(
           THNNState *state,
           THTensor *input,

@@ -1,3 +1,4 @@
+local THNN = require 'nn.THNN'
 local SpatialConvolutionMM, parent = torch.class('nn.SpatialConvolutionMM', 'nn.Module')
 
 function SpatialConvolutionMM:__init(nInputPlane, nOutputPlane, kW, kH, dW, dH, padW, padH)
@@ -46,6 +47,12 @@ function SpatialConvolutionMM:reset(stdv)
    end
 end
 
+function SpatialConvolutionMM:noBias()
+  self.bias = nil
+  self.gradBias = nil
+  return self
+end
+
 local function makeContiguous(self, input, gradOutput)
    if not input:isContiguous() then
       self._input = self._input or input.new()
@@ -74,7 +81,7 @@ function SpatialConvolutionMM:updateOutput(input)
       input:cdata(),
       self.output:cdata(),
       self.weight:cdata(),
-      self.bias:cdata(),
+      THNN.optionalTensor(self.bias),
       self.finput:cdata(),
       self.fgradInput:cdata(),
       self.kW, self.kH,
@@ -92,7 +99,7 @@ function SpatialConvolutionMM:updateGradInput(input, gradOutput)
          gradOutput:cdata(),
          self.gradInput:cdata(),
          self.weight:cdata(),
-         self.bias:cdata(),
+         THNN.optionalTensor(self.bias),
          self.finput:cdata(),
          self.fgradInput:cdata(),
          self.kW, self.kH,
@@ -110,7 +117,7 @@ function SpatialConvolutionMM:accGradParameters(input, gradOutput, scale)
       input:cdata(),
       gradOutput:cdata(),
       self.gradWeight:cdata(),
-      self.gradBias:cdata(),
+      THNN.optionalTensor(self.gradBias),
       self.finput:cdata(),
       self.fgradInput:cdata(),
       self.kW, self.kH,

@@ -1,3 +1,4 @@
+local THNN = require 'nn.THNN'
 local SpatialConvolution, parent = torch.class('nn.SpatialConvolution', 'nn.Module')
 
 function SpatialConvolution:__init(nInputPlane, nOutputPlane, kW, kH, dW, dH, padW, padH)
@@ -41,6 +42,12 @@ function SpatialConvolution:reset(stdv)
       self.weight:uniform(-stdv, stdv)
       self.bias:uniform(-stdv, stdv)
    end
+end
+
+function SpatialConvolution:noBias()
+  self.bias = nil
+  self.gradBias = nil
+  return self
 end
 
 local function backCompatibility(self)
@@ -101,7 +108,7 @@ function SpatialConvolution:updateOutput(input)
       input:cdata(),
       self.output:cdata(),
       self.weight:cdata(),
-      self.bias:cdata(),
+      THNN.optionalTensor(self.bias),
       self.finput:cdata(),
       self.fgradInput:cdata(),
       self.kW, self.kH,
@@ -122,7 +129,7 @@ function SpatialConvolution:updateGradInput(input, gradOutput)
          gradOutput:cdata(),
          self.gradInput:cdata(),
          self.weight:cdata(),
-         self.bias:cdata(),
+         THNN.optionalTensor(self.bias),
          self.finput:cdata(),
          self.fgradInput:cdata(),
          self.kW, self.kH,
@@ -143,7 +150,7 @@ function SpatialConvolution:accGradParameters(input, gradOutput, scale)
       input:cdata(),
       gradOutput:cdata(),
       self.gradWeight:cdata(),
-      self.gradBias:cdata(),
+      THNN.optionalTensor(self.gradBias),
       self.finput:cdata(),
       self.fgradInput:cdata(),
       self.kW, self.kH,
