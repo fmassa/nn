@@ -9,7 +9,8 @@ void THNN_(ClassNLLCriterion_updateOutput)(
           THTensor *output,
           bool sizeAverage,
           THTensor *weights,
-          THTensor *total_weight)
+          THTensor *total_weight,
+          real ignore_label)
 {
   int n_dims = THTensor_(nDimension)(input);
   int n_classes = THTensor_(size)(input, n_dims - 1);
@@ -35,9 +36,12 @@ void THNN_(ClassNLLCriterion_updateOutput)(
 
   if (THTensor_(nDimension)(input) == 1) {
     int cur_target = target_data[0] - 1;
-    THAssert(cur_target >= 0 && cur_target < n_classes);
-    total_weight_data[0] = weights ? weights_data[cur_target] : 1.0f;
-    output_data[0] = -input_data[cur_target] * total_weight_data[0];
+    if (!(ignore_label > 0 && ignore_label == cur_target))
+    {
+      THAssert(cur_target >= 0 && cur_target < n_classes);
+      total_weight_data[0] = weights ? weights_data[cur_target] : 1.0f;
+      output_data[0] = -input_data[cur_target] * total_weight_data[0];
+    }
   } else if (THTensor_(nDimension)(input) == 2) {
     int batch_size = THTensor_(size)(input, 0);
     THAssert(THIndexTensor_(size)(target, 0) == batch_size);
@@ -47,6 +51,8 @@ void THNN_(ClassNLLCriterion_updateOutput)(
     int i;
     for (i = 0; i < batch_size; i++) {
       int cur_target = target_data[i] - 1;
+      if (ignore_label > 0 && ignore_label == cur_target)
+        continue;
       THAssert(cur_target >= 0 && cur_target < n_classes);
 
       real cur_weight = weights ? weights_data[cur_target] : 1.0f;
@@ -67,13 +73,14 @@ void THNN_(ClassNLLCriterion_updateOutput)(
 }
 
 void THNN_(ClassNLLCriterion_updateGradInput)(
-          THNNState *state,
-          THTensor *input,
-          THIndexTensor *target,
-          THTensor *gradInput,
-          bool sizeAverage,
-          THTensor *weights,
-          THTensor *total_weight)
+    THNNState *state,
+    THTensor *input,
+    THIndexTensor *target,
+    THTensor *gradInput,
+    bool sizeAverage,
+    THTensor *weights,
+    THTensor *total_weight,
+    real ignore_label)
 {
   int n_dims = THTensor_(nDimension)(input);
   int n_classes = THTensor_(size)(input, n_dims - 1);
@@ -105,10 +112,15 @@ void THNN_(ClassNLLCriterion_updateGradInput)(
 
   if (THTensor_(nDimension)(input) == 1) {
     int cur_target = target_data[0] - 1;
-    THAssert(cur_target >= 0 && cur_target < n_classes);
+    if (ignore_label > 0 && ignore_label == cur_target){
+      gradInput_data[cur_target] = 0;
+    }
+    else {
+      THAssert(cur_target >= 0 && cur_target < n_classes);
 
-    gradInput_data[cur_target] =
-      (!sizeAverage && weights) ? -weights_data[cur_target] : -1;
+      gradInput_data[cur_target] =
+        (!sizeAverage && weights) ? -weights_data[cur_target] : -1;
+    }
 
   } else if (THTensor_(nDimension)(input) == 2) {
     int batch_size = THTensor_(size)(input, 0);
@@ -119,14 +131,18 @@ void THNN_(ClassNLLCriterion_updateGradInput)(
     int i;
     for (i = 0; i < batch_size; i++){
       int cur_target = target_data[i] - 1;
+      if (ignore_label > 0 && ignore_label == cur_target){
+        gradInput_data[i * n_target + cur_target] = 0;
+      }
+      else {
+        THAssert(cur_target >= 0 && cur_target < n_classes);
 
-      THAssert(cur_target >= 0 && cur_target < n_classes);
+        gradInput_data[i * n_target + cur_target] =
+          -(weights ? weights_data[cur_target] : 1.0f);
 
-      gradInput_data[i * n_target + cur_target] =
-        -(weights ? weights_data[cur_target] : 1.0f);
-
-      if (sizeAverage && *total_weight_data) {
-        gradInput_data[i * n_target + cur_target] /= *total_weight_data;
+        if (sizeAverage && *total_weight_data) {
+          gradInput_data[i * n_target + cur_target] /= *total_weight_data;
+        }
       }
     }
   }
