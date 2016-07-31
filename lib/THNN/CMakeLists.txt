@@ -55,6 +55,9 @@ LINK_DIRECTORIES("${Torch_INSTALL_LIB}")
 
 SET(src init.c)
 ADD_LIBRARY(THNN MODULE init.c)
+if(BUILD_STATIC)
+  ADD_LIBRARY(THNN_static STATIC init.c)
+endif()
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 ### Torch packages supposes libraries prefix is "lib"
 SET_TARGET_PROPERTIES(THNN PROPERTIES
