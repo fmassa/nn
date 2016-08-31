@@ -68,8 +68,9 @@ void THNN_(unfolded_acc)(
           for(y = 0; y < outputHeight; y++) {
             iy = (long long)(y*dH + kh);
             ix = (long long)(0 + kw);
-            if (dW == 1 )
+            if (dW == 1 ) {
                THVector_(add)(dst+(size_t)(iy*inputWidth+ix), src+(size_t)(y*outputWidth), 1, outputWidth); /* note: THVector_add could handle 1 value better */
+            }
             else{
               for(x = 0; x < outputWidth; x++)
                 THVector_(add)(dst+(size_t)(iy*inputWidth+ix+x*dW), src+(size_t)(y*outputWidth+x), 1, 1);
